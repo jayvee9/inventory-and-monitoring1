@@ -45,19 +45,27 @@
 
 /* Status styling */
 .serviceable {
-  color: #166534;
-  background-color: #dcfce7;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-weight: 500;
+  color: #15803d;
+  background-color: #bbf7d0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  border: 1px solid #86efac;
+  display: inline-block;
+  text-align: center;
+  min-width: 120px;
 }
 
 .unserviceable {
-  color: #991b1b;
-  background-color: #fee2e2;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-weight: 500;
+  color: #b91c1c;
+  background-color: #fecaca;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  border: 1px solid #fca5a5;
+  display: inline-block;
+  text-align: center;
+  min-width: 120px;
 }
 
 /* Responsive adjustments */
@@ -65,5 +73,64 @@
   .inventory-list-container {
     margin: 0.5rem 0;
     border-radius: 0;
+  }
+}
+
+.header-group {
+  background-color: var(--primary-color);
+  color: white;
+  text-align: center;
+  padding: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.header-group.system-unit {
+  background-color: #2563eb;
+}
+
+.header-group.monitor {
+  background-color: #3b82f6;
+}
+
+.header-group.details {
+  background-color: #60a5fa;
+}
+
+.inventory-table th {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.inventory-table th:hover {
+  background-color: #f1f5f9;
+}
+
+.inventory-table thead tr:nth-child(2) th {
+  background-color: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+/* Responsive adjustments for the new structure */
+@media (max-width: 1200px) {
+  .inventory-table {
+    font-size: 14px;
+  }
+  
+  .inventory-table th,
+  .inventory-table td {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .inventory-list-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .inventory-table {
+    min-width: 1200px;
   }
 } 

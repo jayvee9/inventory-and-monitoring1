@@ -11,7 +11,8 @@ function OfficeSuppliesPage() {
     { id: 'misc', name: 'Miscellaneous' }
   ];
 
-  const supplyColumns = {
+  // Commented out until implemented
+  /* const supplyColumns = {
     ITEM: {
       NAME: 'Item Name',
       CATEGORY: 'Category',
@@ -25,7 +26,7 @@ function OfficeSuppliesPage() {
       LOCATION: 'LOCATION',
       USER: 'USER'
     }
-  };
+  }; */
 
   return (
     <div className="office-supplies-page">
