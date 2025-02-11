@@ -1,0 +1,16 @@
+.laptops-page {
+  background-color: var(--blue-50);
+}
+
+.laptops-inventory {
+  background-color: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
+}
+
+.category-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--spacing-md);
+} 

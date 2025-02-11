@@ -1,0 +1,27 @@
+.printers-peripherals-page {
+  background-color: var(--gray-50);
+}
+
+.device-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+}
+
+.device-type-card {
+  background: white;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.device-type-card img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+} 

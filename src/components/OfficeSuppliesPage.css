@@ -1,0 +1,31 @@
+.office-supplies-page {
+  background-color: var(--yellow-50);
+}
+
+.category-filters {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  overflow-x: auto;
+}
+
+.category-btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-btn.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.supplies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+} 
