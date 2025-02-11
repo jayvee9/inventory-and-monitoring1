@@ -22,20 +22,13 @@ function LaptopsPage() {
   };
 
   return (
-    <div className="laptops-page">
-      <div className="page-header">
-        <img 
-          src="/icons/laptop-icon.png" 
-          alt="Laptop Icon" 
-          className="category-icon"
-        />
-      </div>
+    
       <InventoryPage 
         type="Laptops" 
         columns={laptopColumns}
         className="laptops-inventory"
       />
-    </div>
+    
   );
 }
 

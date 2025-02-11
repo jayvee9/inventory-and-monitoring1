@@ -4,7 +4,7 @@ const API_CONFIG = {
   TABS: {
     COMPUTERS: '',  // Default tab
     LAPTOPS: '/tabs/Laptops',
-    PRINTERS: '/tabs/Printers',
+    PRINTERS: '/tabs/PrintersPeripherals',  // Updated path
     SUPPLIES: '/tabs/Supplies'
   },
   API_KEY: 'rqjwWhDOI7XREbycmd8I3Y6meS4vPZoC3yzKJoFVL%yy3I8_j7Co5#el21_t3e5A'
@@ -18,15 +18,11 @@ const VALID_STATUS = {
 
 // Updated headers to exactly match Google Sheet column names
 export const HEADERS = {
-  SYSTEM_UNIT: {
+  DEVICE: {
+    TYPE: 'Type',
     SERIAL_NO: 'Serial No.',
     PROPERTY_NO: 'Property No.',
     BRAND_MODEL: 'Brand/Model'
-  },
-  MONITOR: {
-    SERIAL_NO: 'Monitor Serial No.',
-    PROPERTY_NO: 'Monitor Property No.',
-    BRAND_MODEL: 'Monitor Brand/Model'
   },
   COMMON: {
     UNIT_COST: 'UNIT COST',
@@ -34,9 +30,7 @@ export const HEADERS = {
     ACCT_PERSON: 'ACCT. PERSON',
     STATUS: 'STATUS  (SERVICEABLE/ UNSERVICEABLE)',
     LOCATION: 'LOCATION',
-    USER: 'USER',
-    REMARKS: 'REMARKS',
-    PCNAME: 'PCNAME'
+    USER: 'USER'
   }
 };
 
@@ -99,30 +93,36 @@ export const sheetService = {
       const timestamp = Date.now();
       const url = `${getAuthenticatedUrl(type)}?_t=${timestamp}`;
       
-      const data = await sheetService.fetchWithRetries(url);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
-      // Log the entire data structure
-      console.log('Full data structure:', JSON.stringify(data, null, 2));
-      
-      // Ensure we have data and it's an array
+      const data = await response.json();
+      console.log('Full data structure:', data);
+
       if (!Array.isArray(data)) {
         console.error('Invalid data format received:', data);
         return [];
       }
 
-      // Skip header row and filter out empty rows
-      const rows = data.slice(1).filter(row => {
-        return Object.values(row).some(value => 
-          value !== null && value !== undefined && String(value).trim() !== ''
-        );
-      });
-
-      console.log(`Processing ${rows.length} valid rows`);
-      
-      return rows.map((item, index) => ({
-        ...item,
-        _rowIndex: index + 2 // Account for header row
+      // Map the data to match our expected format
+      const processedData = data.map((item, index) => ({
+        type: item['Type'],
+        serialNo: item['Serial No.'],
+        propertyNo: item['Property No.'],
+        brandModel: item['Brand/Model'],
+        unitCost: item['UNIT COST'],
+        date: item['DATE'],
+        accountablePerson: item['ACCT. PERSON'],
+        status: item['STATUS  (SERVICEABLE/ UNSERVICEABLE)'],
+        location: item['LOCATION'],
+        user: item['USER'],
+        _rowIndex: index + 1
       }));
+
+      console.log('Processed data:', processedData);
+      return processedData;
     } catch (error) {
       console.error('Error in getAllItems:', error);
       return [];
@@ -138,10 +138,10 @@ export const sheetService = {
       
       // Search through all items, not just the last 5
       const matches = items.filter(item => {
-        const serialNoMatch = normalizeValue(item[HEADERS.SYSTEM_UNIT.SERIAL_NO]) === 
-                            normalizeValue(newItem[HEADERS.SYSTEM_UNIT.SERIAL_NO]);
-        const propertyNoMatch = normalizeValue(item[HEADERS.SYSTEM_UNIT.PROPERTY_NO]) === 
-                               normalizeValue(newItem[HEADERS.SYSTEM_UNIT.PROPERTY_NO]);
+        const serialNoMatch = normalizeValue(item[HEADERS.DEVICE.SERIAL_NO]) === 
+                            normalizeValue(newItem[HEADERS.DEVICE.SERIAL_NO]);
+        const propertyNoMatch = normalizeValue(item[HEADERS.DEVICE.PROPERTY_NO]) === 
+                               normalizeValue(newItem[HEADERS.DEVICE.PROPERTY_NO]);
         
         if (serialNoMatch && propertyNoMatch) {
           console.log('Found matching item at row:', item._rowIndex);
@@ -176,21 +176,21 @@ export const sheetService = {
         // Define all match conditions
         const matches = {
           status: item[HEADERS.COMMON.STATUS] === newItem[HEADERS.COMMON.STATUS],
-          serialNo: item[HEADERS.SYSTEM_UNIT.SERIAL_NO] === newItem[HEADERS.SYSTEM_UNIT.SERIAL_NO],
-          propertyNo: item[HEADERS.SYSTEM_UNIT.PROPERTY_NO] === newItem[HEADERS.SYSTEM_UNIT.PROPERTY_NO]
+          serialNo: item[HEADERS.DEVICE.SERIAL_NO] === newItem[HEADERS.DEVICE.SERIAL_NO],
+          propertyNo: item[HEADERS.DEVICE.PROPERTY_NO] === newItem[HEADERS.DEVICE.PROPERTY_NO]
         };
         
         // Log comparison for debugging
         console.log('Comparing item:', {
           expected: {
             status: newItem[HEADERS.COMMON.STATUS],
-            serialNo: newItem[HEADERS.SYSTEM_UNIT.SERIAL_NO],
-            propertyNo: newItem[HEADERS.SYSTEM_UNIT.PROPERTY_NO]
+            serialNo: newItem[HEADERS.DEVICE.SERIAL_NO],
+            propertyNo: newItem[HEADERS.DEVICE.PROPERTY_NO]
           },
           actual: {
             status: item[HEADERS.COMMON.STATUS],
-            serialNo: item[HEADERS.SYSTEM_UNIT.SERIAL_NO],
-            propertyNo: item[HEADERS.SYSTEM_UNIT.PROPERTY_NO]
+            serialNo: item[HEADERS.DEVICE.SERIAL_NO],
+            propertyNo: item[HEADERS.DEVICE.PROPERTY_NO]
           },
           matches
         });
@@ -219,19 +219,16 @@ export const sheetService = {
 
   validateItem: (item) => {
     const requiredFields = [
-      'systemUnit.serialNo',
-      'systemUnit.propertyNo',
-      'systemUnit.brandModel',
-      'monitor.serialNo',
-      'monitor.propertyNo',
-      'monitor.brandModel',
+      'type',
+      'serialNo',
+      'propertyNo',
+      'brandModel',
       'unitCost',
       'date',
       'accountablePerson',
       'status',
       'location',
-      'user',
-      'pcName'
+      'user'
     ];
 
     const errors = [];
@@ -270,69 +267,32 @@ export const sheetService = {
 
   addItem: async (item, type = 'COMPUTERS') => {
     try {
-      // Log the incoming status
-      console.log('Incoming status:', item.status);
-
-      // Validate and normalize status
-      const validatedStatus = item.status?.trim().toUpperCase();
-      if (!Object.values(VALID_STATUS).includes(validatedStatus)) {
-        throw new Error(`Invalid status: ${item.status}. Must be either SERVICEABLE or UNSERVICEABLE`);
-      }
-
-      // Create the formatted item with exact column names
       const formattedItem = {
-        [HEADERS.SYSTEM_UNIT.SERIAL_NO]: item.systemUnit.serialNo,
-        [HEADERS.SYSTEM_UNIT.PROPERTY_NO]: item.systemUnit.propertyNo,
-        [HEADERS.SYSTEM_UNIT.BRAND_MODEL]: item.systemUnit.brandModel,
-        [HEADERS.MONITOR.SERIAL_NO]: item.monitor.serialNo,
-        [HEADERS.MONITOR.PROPERTY_NO]: item.monitor.propertyNo,
-        [HEADERS.MONITOR.BRAND_MODEL]: item.monitor.brandModel,
-        [HEADERS.COMMON.UNIT_COST]: item.unitCost,
-        [HEADERS.COMMON.DATE]: item.date,
-        [HEADERS.COMMON.ACCT_PERSON]: item.accountablePerson,
-        [HEADERS.COMMON.STATUS]: validatedStatus,
-        [HEADERS.COMMON.LOCATION]: item.location,
-        [HEADERS.COMMON.USER]: item.user,
-        [HEADERS.COMMON.REMARKS]: item.remarks || '',
-        [HEADERS.COMMON.PCNAME]: item.pcName
+        'Type': item.type || '',
+        'Serial No.': item.serialNo || '',
+        'Property No.': item.propertyNo || '',
+        'Brand/Model': item.brandModel || '',
+        'UNIT COST': item.unitCost || '',
+        'DATE': item.date || '',
+        'ACCT. PERSON': item.accountablePerson || '',
+        'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status || '',
+        'LOCATION': item.location || '',
+        'USER': item.user || ''
       };
-
-      // Log the formatted item before submission
-      console.log('Submitting item with status:', {
-        columnName: HEADERS.COMMON.STATUS,
-        value: formattedItem[HEADERS.COMMON.STATUS]
-      });
 
       const response = await fetch(getAuthenticatedUrl(type), {
         method: 'POST',
-        mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
         },
         body: JSON.stringify(formattedItem)
       });
 
-      // Log the raw response for debugging
-      const responseText = await response.text();
-      console.log('Raw API Response:', responseText);
-
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status} - ${responseText}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result = JSON.parse(responseText);
-      console.log('Parsed API Response:', result);
-
-      // Verify the addition with explicit status check
-      await wait(2000);
-      const verified = await sheetService.verifyItemAdded(formattedItem);
-
-      return {
-        success: true,
-        warning: verified ? null : 'Item added but verification pending. Please refresh.',
-        data: result
-      };
+      return true;
     } catch (error) {
       console.error('Error adding item:', error);
       throw error;
@@ -352,15 +312,12 @@ export const sheetService = {
         if (searchTerm) {
           const searchString = searchTerm.toLowerCase();
           const searchableFields = [
-            item[HEADERS.SYSTEM_UNIT.SERIAL_NO],
-            item[HEADERS.SYSTEM_UNIT.PROPERTY_NO],
-            item[HEADERS.SYSTEM_UNIT.BRAND_MODEL],
-            item[HEADERS.MONITOR.SERIAL_NO],
-            item[HEADERS.MONITOR.PROPERTY_NO],
-            item[HEADERS.MONITOR.BRAND_MODEL],
+            item[HEADERS.DEVICE.SERIAL_NO],
+            item[HEADERS.DEVICE.PROPERTY_NO],
+            item[HEADERS.DEVICE.BRAND_MODEL],
+            item[HEADERS.DEVICE.TYPE],
             item[HEADERS.COMMON.LOCATION],
-            item[HEADERS.COMMON.USER],
-            item[HEADERS.COMMON.PCNAME]
+            item[HEADERS.COMMON.USER]
           ];
           
           const matchesSearch = searchableFields.some(field => 

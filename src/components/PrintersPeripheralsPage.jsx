@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import InventoryPage from './InventoryPage';
+import printerIcon from '../assets/icons/printer.png';
+import scannerIcon from '../assets/icons/scanner.png';
+import peripheralIcon from '../assets/icons/peripheral.png';
 import './PrintersPeripheralsPage.css';
 
 function PrintersPeripheralsPage() {
+  const [selectedType, setSelectedType] = useState('all');
+
   const printerColumns = {
     DEVICE: {
       TYPE: 'Type',
@@ -16,30 +21,40 @@ function PrintersPeripheralsPage() {
       ACCT_PERSON: 'ACCT. PERSON',
       STATUS: 'STATUS (SERVICEABLE/UNSERVICEABLE)',
       LOCATION: 'LOCATION',
-      USER: 'USER'
+      USER: 'USER',
+      REMARKS: 'REMARKS'
     }
   };
 
   const deviceTypes = [
-    { id: 'printer', name: 'Printer', icon: '/icons/printer.png' },
-    { id: 'scanner', name: 'Scanner', icon: '/icons/scanner.png' },
-    { id: 'peripheral', name: 'Other Peripherals', icon: '/icons/peripheral.png' }
+    { id: 'printer', name: 'Printer', icon: printerIcon },
+    { id: 'scanner', name: 'Scanner', icon: scannerIcon },
+    { id: 'peripheral', name: 'Other Peripherals', icon: peripheralIcon }
   ];
+
+  const handleTypeSelect = (typeId) => {
+    setSelectedType(typeId);
+  };
 
   return (
     <div className="printers-peripherals-page">
       <div className="device-type-grid">
         {deviceTypes.map(type => (
-          <div key={type.id} className="device-type-card">
-            <img src={type.icon} alt={type.name} />
+          <div 
+            key={type.id} 
+            className={`device-type-card ${selectedType === type.id ? 'active' : ''}`}
+            onClick={() => handleTypeSelect(type.id)}
+          >
+            <img src={type.icon} alt={type.name} className="device-icon" />
             <span>{type.name}</span>
           </div>
         ))}
       </div>
       <InventoryPage 
-        type="Printers & Peripherals" 
+        type="PRINTERS"
         columns={printerColumns}
         className="printers-inventory"
+        filterType={selectedType !== 'all' ? selectedType : null}
       />
     </div>
   );

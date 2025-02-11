@@ -19,6 +19,14 @@ function InventoryPage({ type }) {
       setLoading(true);
       let data = await sheetService.getAllItems(type);
       
+      // Apply status filter
+      if (filters.STATUS) {
+        data = data.filter(item => 
+          item.status && item.status.trim().toUpperCase() === filters.STATUS.trim().toUpperCase()
+        );
+      }
+      
+      // Apply sort if needed
       if (sortConfig.field) {
         data = sheetService.sortItems(data, sortConfig.field, sortConfig.direction);
       }
@@ -31,7 +39,7 @@ function InventoryPage({ type }) {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, filters, sortConfig, type]);
+  }, [type, filters, sortConfig]);
 
   useEffect(() => {
     fetchItems();

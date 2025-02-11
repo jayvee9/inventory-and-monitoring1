@@ -1,8 +1,8 @@
+import './InventoryList.css';
 import React from 'react';
 import { HEADERS } from '../services/sheetService';
 
 function InventoryList({ items, onSort, sortConfig, type }) {
-  // Ensure items is always an array
   const safeItems = Array.isArray(items) ? items : [];
 
   const formatToPeso = (value) => {
@@ -16,10 +16,9 @@ function InventoryList({ items, onSort, sortConfig, type }) {
   };
 
   const getStatusClass = (status) => {
-    // Add null check for status
     if (!status || typeof status !== 'string') return '';
-    const statusLower = status.toLowerCase().trim();
-    return statusLower === 'serviceable' ? 'serviceable' : 'unserviceable';
+    const statusUpper = status.trim().toUpperCase();
+    return statusUpper === 'SERVICEABLE' ? 'serviceable' : 'unserviceable';
   };
 
   const getSafeValue = (item, key, defaultValue = '-') => {
@@ -28,71 +27,72 @@ function InventoryList({ items, onSort, sortConfig, type }) {
     return item[key] || defaultValue;
   };
 
-  const renderTable = () => (
-    <table className="inventory-table">
-      <thead>
-        <tr className="header-group">
-          <th colSpan="3" className="category-header">System Unit</th>
-          <th colSpan="3" className="category-header">Monitor</th>
-          <th colSpan="8" className="category-header">Common Information</th>
-        </tr>
-        <tr>
-          <th className="sub-header">Serial No.</th>
-          <th className="sub-header">Property No.</th>
-          <th className="sub-header">Brand/Model</th>
-          <th className="sub-header">Serial No.</th>
-          <th className="sub-header">Property No.</th>
-          <th className="sub-header">Brand/Model</th>
-          <th className="sub-header">Unit Cost</th>
-          <th className="sub-header">Date</th>
-          <th className="sub-header">Acct. Person</th>
-          <th className="sub-header">Status</th>
-          <th className="sub-header">Location</th>
-          <th className="sub-header">User</th>
-          <th className="sub-header">Remarks</th>
-          <th className="sub-header">PC Name</th>
-        </tr>
-      </thead>
-      <tbody>
-        {safeItems.map((item, index) => (
-          <tr key={index}>
-            {/* System Unit Fields */}
-            <td>{getSafeValue(item, HEADERS.SYSTEM_UNIT.SERIAL_NO)}</td>
-            <td>{getSafeValue(item, HEADERS.SYSTEM_UNIT.PROPERTY_NO)}</td>
-            <td>{getSafeValue(item, HEADERS.SYSTEM_UNIT.BRAND_MODEL)}</td>
-            
-            {/* Monitor Fields */}
-            <td>{getSafeValue(item, HEADERS.MONITOR.SERIAL_NO)}</td>
-            <td>{getSafeValue(item, HEADERS.MONITOR.PROPERTY_NO)}</td>
-            <td>{getSafeValue(item, HEADERS.MONITOR.BRAND_MODEL)}</td>
-            
-            {/* Common Fields */}
-            <td className="unit-cost-cell">
-              {formatToPeso(getSafeValue(item, HEADERS.COMMON.UNIT_COST, 0))}
-            </td>
-            <td>{getSafeValue(item, HEADERS.COMMON.DATE)}</td>
-            <td>{getSafeValue(item, HEADERS.COMMON.ACCT_PERSON)}</td>
-            <td className={`status-cell ${getStatusClass(getSafeValue(item, HEADERS.COMMON.STATUS))}`}>
-              {getSafeValue(item, HEADERS.COMMON.STATUS)}
-            </td>
-            <td>{getSafeValue(item, HEADERS.COMMON.LOCATION)}</td>
-            <td>{getSafeValue(item, HEADERS.COMMON.USER)}</td>
-            <td>{getSafeValue(item, HEADERS.COMMON.REMARKS)}</td>
-            <td>{getSafeValue(item, HEADERS.COMMON.PCNAME)}</td>
+  const renderTable = () => {
+    if (safeItems.length === 0) {
+      return <div className="no-items">No inventory items found</div>;
+    }
+
+    return (
+      <table className="inventory-table">
+        <thead>
+          <tr>
+            {type === 'PRINTERS' ? (
+              <>
+                <th>Type</th>
+                <th>Serial No.</th>
+                <th>Property No.</th>
+                <th>Brand/Model</th>
+              </>
+            ) : (
+              <>
+                <th>Serial No.</th>
+                <th>Property No.</th>
+                <th>Brand/Model</th>
+              </>
+            )}
+            <th>Unit Cost</th>
+            <th>Date</th>
+            <th>Accountable Person</th>
+            <th>Status</th>
+            <th>Location</th>
+            <th>User</th>
+            <th>Remarks</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
-  );
+        </thead>
+        <tbody>
+          {safeItems.map((item, index) => (
+            <tr key={index}>
+              {type === 'PRINTERS' ? (
+                <>
+                  <td>{item.type || '-'}</td>
+                  <td>{item.serialNo || '-'}</td>
+                  <td>{item.propertyNo || '-'}</td>
+                  <td>{item.brandModel || '-'}</td>
+                </>
+              ) : (
+                <>
+                  <td>{item.serialNo || '-'}</td>
+                  <td>{item.propertyNo || '-'}</td>
+                  <td>{item.brandModel || '-'}</td>
+                </>
+              )}
+              <td>{formatToPeso(item.unitCost)}</td>
+              <td>{item.date || '-'}</td>
+              <td>{item.accountablePerson || '-'}</td>
+              <td className={getStatusClass(item.status)}>{item.status || '-'}</td>
+              <td>{item.location || '-'}</td>
+              <td>{item.user || '-'}</td>
+              <td>{item.remarks || '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
 
   return (
-    <div className="inventory-list">
-      <h2 className="section-title">Inventory List of {type}</h2>
-      {safeItems.length === 0 ? (
-        <div className="no-data">No inventory items found</div>
-      ) : (
-        renderTable()
-      )}
+    <div className="inventory-list-container">
+      {renderTable()}
     </div>
   );
 }
