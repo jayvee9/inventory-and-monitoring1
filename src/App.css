@@ -444,9 +444,12 @@ h2.section-title {
   align-items: center;
   padding: 0 2rem;
   gap: 2rem;
+  position: relative;
 }
 
 .logo-section {
+  position: absolute;
+  left: 2rem;
   display: flex;
   align-items: center;
   gap: 1.5rem;
@@ -468,6 +471,8 @@ h2.section-title {
   flex: 1;
   text-align: center;
   padding: 1rem 0;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .republic-title {

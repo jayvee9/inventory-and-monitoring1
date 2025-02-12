@@ -86,16 +86,29 @@
   letter-spacing: 0.05em;
 }
 
-.header-group.system-unit {
-  background-color: #2563eb;
+.header-group.system-unit { 
+  background-color: #3b82f6;
+  color: white;
+  
 }
 
 .header-group.monitor {
   background-color: #3b82f6;
+  color: white;
+  
 }
 
 .header-group.details {
   background-color: #60a5fa;
+  color: white;
+  
+}
+
+.header-group.printers-peripherals {
+  background-color: #3b82f6;
+  color: white;
+  text-align: center;
+  
 }
 
 .inventory-table th {

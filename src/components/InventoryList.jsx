@@ -32,7 +32,7 @@ function InventoryList({ items, onSort, sortConfig, type }) {
       <table className="inventory-table">
         <thead>
           <tr className="header-groups">
-            <th colSpan="10" className="header-group details">Printers and Peripherals Inventory</th>
+            <th colSpan="10" className="header-group printers-peripherals">Printers and Peripherals Inventory</th>
           </tr>
           <tr>
             <th onClick={() => onSort('type')}>Type</th>
