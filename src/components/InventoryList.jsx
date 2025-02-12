@@ -1,8 +1,12 @@
 import './InventoryList.css';
-import React from 'react';
+import React, { useState } from 'react';
+import StatusPopup from './StatusPopup';
 // import { HEADERS } from '../services/sheetService';
 
 function InventoryList({ items, onSort, sortConfig, type }) {
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
   const safeItems = Array.isArray(items) ? items : [];
 
   const formatToPeso = (value) => {
@@ -26,6 +30,11 @@ function InventoryList({ items, onSort, sortConfig, type }) {
     if (!item || !key) return defaultValue;
     return item[key] || defaultValue;
   }; */
+
+  const handleStatusClick = (status, date, remarks) => {
+    setSelectedStatus({ status, date, disposalInfo: { remarks, disposed: remarks?.toLowerCase().includes('disposed') } });
+    setIsPopupOpen(true);
+  };
 
   const renderPrintersTable = () => {
     return (
@@ -57,7 +66,13 @@ function InventoryList({ items, onSort, sortConfig, type }) {
               <td>{formatToPeso(item.unitCost)}</td>
               <td>{item.date || '-'}</td>
               <td>{item.accountablePerson || '-'}</td>
-              <td className={getStatusClass(item.status)}>{item.status || '-'}</td>
+              <td 
+                className={getStatusClass(item.status)}
+                onClick={() => handleStatusClick(item.status, item.date, item.remarks)}
+                style={{ cursor: 'pointer' }}
+              >
+                {item.status || '-'}
+              </td>
               <td>{item.location || '-'}</td>
               <td>{item.user || '-'}</td>
             </tr>
@@ -110,7 +125,13 @@ function InventoryList({ items, onSort, sortConfig, type }) {
               <td>{formatToPeso(item.unitCost)}</td>
               <td>{item.date || '-'}</td>
               <td>{item.accountablePerson || '-'}</td>
-              <td className={getStatusClass(item.status)}>{item.status || '-'}</td>
+              <td 
+                className={getStatusClass(item.status)}
+                onClick={() => handleStatusClick(item.status, item.date, item.remarks)}
+                style={{ cursor: 'pointer' }}
+              >
+                {item.status || '-'}
+              </td>
               <td>{item.location || '-'}</td>
               <td>{item.user || '-'}</td>
               <td>{item.pcName || '-'}</td>
@@ -125,6 +146,13 @@ function InventoryList({ items, onSort, sortConfig, type }) {
   return (
     <div className="inventory-list-container">
       {type === 'PRINTERS' ? renderPrintersTable() : renderComputerTable()}
+      <StatusPopup
+        status={selectedStatus?.status}
+        date={selectedStatus?.date}
+        disposalInfo={selectedStatus?.disposalInfo}
+        isOpen={isPopupOpen}
+        onClose={() => setIsPopupOpen(false)}
+      />
     </div>
   );
 }
