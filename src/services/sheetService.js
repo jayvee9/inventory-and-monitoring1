@@ -5,7 +5,7 @@ const API_CONFIG = {
     COMPUTERS: '',  // Default tab
     LAPTOPS: '/tabs/Laptops',
     PRINTERS: '/tabs/PrintersPeripherals',  // Updated path
-    SUPPLIES: '/tabs/Supplies'
+    SUPPLIES: '/tabs/OfficeSupplies',
   },
   API_KEY: 'rqjwWhDOI7XREbycmd8I3Y6meS4vPZoC3yzKJoFVL%yy3I8_j7Co5#el21_t3e5A'
 };
@@ -36,6 +36,20 @@ export const HEADERS = {
     LOCATION: 'LOCATION',
     USER: 'USER',
     REMARKS: 'REMARKS'
+  },
+  DEVICE: {
+    TYPE: 'Type',
+    SERIAL_NO: 'Serial No.',
+    PROPERTY_NO: 'Property No.',
+    BRAND_MODEL: 'Brand/Model'
+  },
+  SUPPLIES: {
+    ITEM: 'Item',
+    MIN_INVENTORY: 'Inventory Minimum',
+    QUANTITY: 'Quantity',
+    UNITS: 'Units',
+    PURPOSE: 'Purpose',
+    REQUESTER: 'Requester'
   }
 };
 
@@ -101,28 +115,42 @@ export const sheetService = {
       
       const data = await response.json();
       
-      // Map the data to match our hierarchical structure
-      const processedData = data.map((item, index) => ({
-        // System Unit fields
-        serialNo: item['Serial No.'],
-        propertyNo: item['Property No.'],
-        brandModel: item['Brand/Model'],
-        
-        // Monitor fields
-        monitorSerialNo: item['Monitor Serial No.'],
-        monitorPropertyNo: item['Monitor Property No.'],
-        monitorBrandModel: item['Monitor Brand/Model'],
-        
-        // Common fields
-        unitCost: item['UNIT COST'],
-        date: item['DATE'],
-        accountablePerson: item['ACCT. PERSON'],
-        status: item['STATUS  (SERVICEABLE/ UNSERVICEABLE)'],
-        location: item['LOCATION'],
-        user: item['USER'],
-        remarks: item['REMARKS'],
-        _rowIndex: index + 1
-      }));
+      // Map the data based on type
+      const processedData = data.map((item, index) => {
+        if (type === 'PRINTERS') {
+          return {
+            type: item['Type'],
+            serialNo: item['Serial No.'],
+            propertyNo: item['Property No.'],
+            brandModel: item['Brand/Model'],
+            unitCost: item['UNIT COST'],
+            date: item['DATE'],
+            accountablePerson: item['ACCT. PERSON'],
+            status: item['STATUS  (SERVICEABLE/ UNSERVICEABLE)'],
+            location: item['LOCATION'],
+            user: item['USER'],
+            _rowIndex: index + 0
+          };
+        } else {
+          // Existing mapping for computers and laptops
+          return {
+            serialNo: item['Serial No.'],
+            propertyNo: item['Property No.'],
+            brandModel: item['Brand/Model'],
+            monitorSerialNo: item['Monitor Serial No.'],
+            monitorPropertyNo: item['Monitor Property No.'],
+            monitorBrandModel: item['Monitor Brand/Model'],
+            unitCost: item['UNIT COST'],
+            date: item['DATE'],
+            accountablePerson: item['ACCT. PERSON'],
+            status: item['STATUS  (SERVICEABLE/ UNSERVICEABLE)'],
+            location: item['LOCATION'],
+            user: item['USER'],
+            remarks: item['REMARKS'],
+            _rowIndex: index + 0
+          };
+        }
+      });
 
       return processedData;
     } catch (error) {
@@ -269,26 +297,58 @@ export const sheetService = {
 
   addItem: async (item, type = 'COMPUTERS') => {
     try {
-      const formattedItem = {
-        // System Unit fields
-        'Serial No.': item.serialNo || '',
-        'Property No.': item.propertyNo || '',
-        'Brand/Model': item.brandModel || '',
-        
-        // Monitor fields
-        'Monitor Serial No.': item.monitorSerialNo || '',
-        'Monitor Property No.': item.monitorPropertyNo || '',
-        'Monitor Brand/Model': item.monitorBrandModel || '',
-        
-        // Common fields
-        'UNIT COST': item.unitCost || '',
-        'DATE': item.date || '',
-        'ACCT. PERSON': item.accountablePerson || '',
-        'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status || '',
-        'LOCATION': item.location || '',
-        'USER': item.user || '',
-        'REMARKS': item.remarks || ''
-      };
+      console.log('Received item in sheetService:', item);
+      
+      let formattedItem;
+      
+      if (type === 'PRINTERS') {
+        formattedItem = {
+          'Type': item.type || '',
+          'Serial No.': item.serialNo || '',
+          'Property No.': item.propertyNo || '',
+          'Brand/Model': item.brandModel || '',
+          'UNIT COST': item.unitCost || '',
+          'DATE': item.date || '',
+          'ACCT. PERSON': item.accountablePerson || '',
+          'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status || '',
+          'LOCATION': item.location || '',
+          'USER': item.user || ''
+        };
+      } else if (type === 'Laptops') {
+        formattedItem = {
+          'Serial No.': item.serialNo || '',
+          'Property No.': item.propertyNo || '',
+          'Brand/Model': item.brandModel || '',
+          'UNIT COST': item.unitCost || '',
+          'DATE': item.date || '',
+          'ACCT. PERSON': item.accountablePerson || '',
+          'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status || '',
+          'LOCATION': item.location || '',
+          'USER': item.user || '',
+          'REMARKS': item.remarks || '',
+          'PCNAME': item.pcName || ''
+        };
+      } else {
+        // Original computer formatting
+        formattedItem = {
+          'Serial No.': item.systemUnit?.serialNo || '',
+          'Property No.': item.systemUnit?.propertyNo || '',
+          'Brand/Model': item.systemUnit?.brandModel || '',
+          'Monitor Serial No.': item.monitor?.serialNo || '',
+          'Monitor Property No.': item.monitor?.propertyNo || '',
+          'Monitor Brand/Model': item.monitor?.brandModel || '',
+          'UNIT COST': item.unitCost || '',
+          'DATE': item.date || '',
+          'ACCT. PERSON': item.accountablePerson || '',
+          'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status || '',
+          'LOCATION': item.location || '',
+          'USER': item.user || '',
+          'REMARKS': item.remarks || '',
+          'PCNAME': item.pcName || ''
+        };
+      }
+
+      console.log('Formatted item for API:', formattedItem);
 
       const response = await fetch(getAuthenticatedUrl(type), {
         method: 'POST',
@@ -296,7 +356,11 @@ export const sheetService = {
         body: JSON.stringify(formattedItem)
       });
 
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+      
       return true;
     } catch (error) {
       console.error('Error adding item:', error);
@@ -419,6 +483,31 @@ export const sheetService = {
       console.error('API connection check failed:', error);
       return false;
     }
+  },
+
+  sortItems: (items, field, direction = 'asc') => {
+    if (!Array.isArray(items) || !field) return items;
+
+    return [...items].sort((a, b) => {
+      let valueA = a[field] || '';
+      let valueB = b[field] || '';
+
+      // Handle numeric values (like unitCost)
+      if (field === 'unitCost') {
+        valueA = parseFloat(valueA) || 0;
+        valueB = parseFloat(valueB) || 0;
+      } else {
+        // Convert to strings for string comparison
+        valueA = String(valueA).toLowerCase();
+        valueB = String(valueB).toLowerCase();
+      }
+
+      if (direction === 'asc') {
+        return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+      } else {
+        return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
+      }
+    });
   }
 };
 

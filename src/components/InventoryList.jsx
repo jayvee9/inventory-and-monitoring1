@@ -27,6 +27,46 @@ function InventoryList({ items, onSort, sortConfig, type }) {
     return item[key] || defaultValue;
   }; */
 
+  const renderPrintersTable = () => {
+    return (
+      <table className="inventory-table">
+        <thead>
+          <tr className="header-groups">
+            <th colSpan="10" className="header-group details">Printers and Peripherals Inventory</th>
+          </tr>
+          <tr>
+            <th onClick={() => onSort('type')}>Type</th>
+            <th onClick={() => onSort('serialNo')}>Serial No.</th>
+            <th onClick={() => onSort('propertyNo')}>Property No.</th>
+            <th onClick={() => onSort('brandModel')}>Brand/Model</th>
+            <th onClick={() => onSort('unitCost')}>UNIT COST</th>
+            <th onClick={() => onSort('date')}>DATE</th>
+            <th onClick={() => onSort('accountablePerson')}>ACCT. PERSON</th>
+            <th onClick={() => onSort('status')}>STATUS</th>
+            <th onClick={() => onSort('location')}>LOCATION</th>
+            <th onClick={() => onSort('user')}>USER</th>
+          </tr>
+        </thead>
+        <tbody>
+          {safeItems.map((item, index) => (
+            <tr key={index}>
+              <td>{item.type || '-'}</td>
+              <td>{item.serialNo || '-'}</td>
+              <td>{item.propertyNo || '-'}</td>
+              <td>{item.brandModel || '-'}</td>
+              <td>{formatToPeso(item.unitCost)}</td>
+              <td>{item.date || '-'}</td>
+              <td>{item.accountablePerson || '-'}</td>
+              <td className={getStatusClass(item.status)}>{item.status || '-'}</td>
+              <td>{item.location || '-'}</td>
+              <td>{item.user || '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
+
   const renderComputerTable = () => {
     return (
       <table className="inventory-table">
@@ -60,17 +100,12 @@ function InventoryList({ items, onSort, sortConfig, type }) {
         <tbody>
           {safeItems.map((item, index) => (
             <tr key={index}>
-              {/* System Unit Data */}
               <td>{item.serialNo || '-'}</td>
               <td>{item.propertyNo || '-'}</td>
               <td>{item.brandModel || '-'}</td>
-              
-              {/* Monitor Data */}
               <td>{item.monitorSerialNo || '-'}</td>
               <td>{item.monitorPropertyNo || '-'}</td>
               <td>{item.monitorBrandModel || '-'}</td>
-              
-              {/* Other Details Data */}
               <td>{formatToPeso(item.unitCost)}</td>
               <td>{item.date || '-'}</td>
               <td>{item.accountablePerson || '-'}</td>
@@ -87,7 +122,7 @@ function InventoryList({ items, onSort, sortConfig, type }) {
 
   return (
     <div className="inventory-list-container">
-      {renderComputerTable()}
+      {type === 'PRINTERS' ? renderPrintersTable() : renderComputerTable()}
     </div>
   );
 }

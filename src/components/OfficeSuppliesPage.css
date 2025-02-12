@@ -1,12 +1,16 @@
 .office-supplies-page {
-  background-color: var(--yellow-50);
+  padding: var(--spacing-lg);
 }
 
 .category-filters {
   display: flex;
   gap: var(--spacing-md);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   overflow-x: auto;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-lg);
 }
 
 .category-btn {
@@ -16,11 +20,47 @@
   background: white;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .category-btn.active {
   background: var(--primary-color);
   color: white;
+  border-color: var(--primary-color);
+}
+
+.category-btn:hover {
+  background: var(--primary-light);
+  color: white;
+  border-color: var(--primary-light);
+}
+
+.header-group.supplies {
+  background-color: var(--primary-color);
+  color: white;
+  text-align: center;
+  padding: var(--spacing-md);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.inventory-table th {
+  background-color: var(--background-secondary);
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: var(--spacing-md);
+  text-align: left;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.inventory-table td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.inventory-table tbody tr:hover {
+  background-color: var(--background-secondary);
 }
 
 .supplies-grid {

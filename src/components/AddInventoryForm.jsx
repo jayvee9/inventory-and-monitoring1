@@ -1,14 +1,42 @@
 import React, { useState } from 'react';
 
-function AddInventoryForm({ onSubmit, onCancel }) {
-  const initialState = {
-    // System Unit details
+function AddInventoryForm({ onSubmit, onCancel, type }) {
+  const initialState = type === 'PRINTERS' ? {
+    // Printer specific fields
+    type: '', // Printer/Scanner/Peripheral
+    serialNo: '',
+    propertyNo: '',
+    brandModel: '',
+    
+    // Common details
+    unitCost: '',
+    date: new Date().toISOString().split('T')[0],
+    accountablePerson: '',
+    status: 'SERVICEABLE',
+    location: '',
+    user: ''
+  } : type === 'Laptops' ? {
+    // Laptop details
+    serialNo: '',
+    propertyNo: '',
+    brandModel: '',
+    
+    // Common details
+    unitCost: '',
+    date: new Date().toISOString().split('T')[0],
+    accountablePerson: '',
+    status: 'SERVICEABLE',
+    location: '',
+    user: '',
+    remarks: '',
+    pcName: ''
+  } : {
+    // Original computer structure
     systemUnit: {
       serialNo: '',
       propertyNo: '',
       brandModel: '',
     },
-    // Monitor details
     monitor: {
       serialNo: '',
       propertyNo: '',
@@ -28,79 +56,77 @@ function AddInventoryForm({ onSubmit, onCancel }) {
   const [formData, setFormData] = useState(initialState);
   const [errors, setErrors] = useState({});
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    // Validate System Unit fields
-    if (!formData.systemUnit.serialNo) newErrors['systemUnit.serialNo'] = 'Required';
-    if (!formData.systemUnit.propertyNo) newErrors['systemUnit.propertyNo'] = 'Required';
-    if (!formData.systemUnit.brandModel) newErrors['systemUnit.brandModel'] = 'Required';
-    
-    // Validate Monitor fields
-    if (!formData.monitor.serialNo) newErrors['monitor.serialNo'] = 'Required';
-    if (!formData.monitor.propertyNo) newErrors['monitor.propertyNo'] = 'Required';
-    if (!formData.monitor.brandModel) newErrors['monitor.brandModel'] = 'Required';
-    
-    // Validate common fields
-    if (!formData.unitCost) newErrors.unitCost = 'Required';
-    if (formData.unitCost && Number(formData.unitCost) <= 0) {
-      newErrors.unitCost = 'Must be greater than 0';
-    }
-    if (!formData.date) newErrors.date = 'Required';
-    if (!formData.accountablePerson) newErrors.accountablePerson = 'Required';
-    if (!formData.location) newErrors.location = 'Required';
-    if (!formData.user) newErrors.user = 'Required';
-    if (!formData.pcName) newErrors.pcName = 'Required';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    try {
-      // Log the form data before submission
-      console.log('Submitting form with status:', formData.status);
-      
-      // Validate status before submission
-      if (!['SERVICEABLE', 'UNSERVICEABLE'].includes(formData.status)) {
-        throw new Error('Invalid status selected');
-      }
-
-      if (validateForm()) {
-        await onSubmit(formData);
-        setFormData(initialState);
-      }
-    } catch (error) {
-      console.error('Form submission error:', error);
-      // Handle error (show to user)
-    }
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    // Handle nested object updates
-    if (name.includes('.')) {
-      const [category, field] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [category]: {
-          ...prev[category],
-          [field]: value
-        }
-      }));
+    if (type === 'Computers') {
+      // Handle nested computer form data
+      if (name.startsWith('systemUnit.') || name.startsWith('monitor.')) {
+        const [section, field] = name.split('.');
+        setFormData(prev => ({
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [field]: value
+          }
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value
+        }));
+      }
     } else {
+      // Handle flat form data for laptops and printers
       setFormData(prev => ({
         ...prev,
         [name]: value
       }));
     }
+  };
 
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (type === 'PRINTERS') {
+      // Validate Printer fields
+      if (!formData.type) newErrors.type = 'Required';
+      if (!formData.serialNo) newErrors.serialNo = 'Required';
+      if (!formData.propertyNo) newErrors.propertyNo = 'Required';
+      if (!formData.brandModel) newErrors.brandModel = 'Required';
+    } else if (type === 'Computers') {
+      // Validate Computer fields
+      if (!formData.systemUnit.serialNo) newErrors['systemUnit.serialNo'] = 'Required';
+      if (!formData.systemUnit.propertyNo) newErrors['systemUnit.propertyNo'] = 'Required';
+      if (!formData.systemUnit.brandModel) newErrors['systemUnit.brandModel'] = 'Required';
+      if (!formData.monitor.serialNo) newErrors['monitor.serialNo'] = 'Required';
+      if (!formData.monitor.propertyNo) newErrors['monitor.propertyNo'] = 'Required';
+      if (!formData.monitor.brandModel) newErrors['monitor.brandModel'] = 'Required';
+    } else if (type === 'Laptops') {
+      // Validate Laptop fields
+      if (!formData.serialNo) newErrors.serialNo = 'Required';
+      if (!formData.propertyNo) newErrors.propertyNo = 'Required';
+      if (!formData.brandModel) newErrors.brandModel = 'Required';
+    }
+
+    // Common validations
+    if (!formData.unitCost) newErrors.unitCost = 'Required';
+    if (!formData.date) newErrors.date = 'Required';
+    if (!formData.accountablePerson) newErrors.accountablePerson = 'Required';
+    if (!formData.status) newErrors.status = 'Required';
+    if (!formData.location) newErrors.location = 'Required';
+    if (!formData.user) newErrors.user = 'Required';
+
+    return newErrors;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newErrors = validateForm();
+    
+    if (Object.keys(newErrors).length === 0) {
+      onSubmit(formData);
+    } else {
+      setErrors(newErrors);
     }
   };
 
@@ -115,97 +141,209 @@ function AddInventoryForm({ onSubmit, onCancel }) {
 
   return (
     <div className="add-inventory-form">
-      <h2>Add New Inventory Item</h2>
+      <h2>Add New {type}</h2>
       <form onSubmit={handleSubmit}>
-        {/* System Unit Section */}
-        <div className="form-section">
-          <h3 className="form-section-title">System Unit Details</h3>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Serial No. *</label>
-              <input
-                type="text"
-                name="systemUnit.serialNo"
-                value={formData.systemUnit.serialNo}
-                onChange={handleChange}
-                className={errors['systemUnit.serialNo'] ? 'error' : ''}
-              />
-              {errors['systemUnit.serialNo'] && 
-                <span className="error-message">{errors['systemUnit.serialNo']}</span>}
+        {type === 'PRINTERS' && (
+          <div className="form-section">
+            <h3 className="form-section-title">Printer/Peripheral Details</h3>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Device Type *</label>
+                <select
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className={errors.type ? 'error' : ''}
+                  required
+                >
+                  <option value="">Select Type</option>
+                  <option value="Printer">Printer</option>
+                  <option value="Scanner">Scanner</option>
+                  <option value="Other Peripherals">Other Peripherals</option>
+                </select>
+                {errors.type && <span className="error-message">{errors.type}</span>}
+              </div>
+
+              <div className="form-group">
+                <label>Serial No. *</label>
+                <input
+                  type="text"
+                  name="serialNo"
+                  value={formData.serialNo}
+                  onChange={handleChange}
+                  className={errors.serialNo ? 'error' : ''}
+                />
+                {errors.serialNo && <span className="error-message">{errors.serialNo}</span>}
+              </div>
+
+              <div className="form-group">
+                <label>Property No. *</label>
+                <input
+                  type="text"
+                  name="propertyNo"
+                  value={formData.propertyNo}
+                  onChange={handleChange}
+                  className={errors.propertyNo ? 'error' : ''}
+                />
+                {errors.propertyNo && <span className="error-message">{errors.propertyNo}</span>}
+              </div>
             </div>
 
-            <div className="form-group">
-              <label>Property No. *</label>
-              <input
-                type="text"
-                name="systemUnit.propertyNo"
-                value={formData.systemUnit.propertyNo}
-                onChange={handleChange}
-                className={errors['systemUnit.propertyNo'] ? 'error' : ''}
-              />
-              {errors['systemUnit.propertyNo'] && 
-                <span className="error-message">{errors['systemUnit.propertyNo']}</span>}
-            </div>
-
-            <div className="form-group">
-              <label>Brand/Model *</label>
-              <input
-                type="text"
-                name="systemUnit.brandModel"
-                value={formData.systemUnit.brandModel}
-                onChange={handleChange}
-                className={errors['systemUnit.brandModel'] ? 'error' : ''}
-              />
-              {errors['systemUnit.brandModel'] && 
-                <span className="error-message">{errors['systemUnit.brandModel']}</span>}
+            <div className="form-row">
+              <div className="form-group">
+                <label>Brand/Model *</label>
+                <input
+                  type="text"
+                  name="brandModel"
+                  value={formData.brandModel}
+                  onChange={handleChange}
+                  className={errors.brandModel ? 'error' : ''}
+                />
+                {errors.brandModel && <span className="error-message">{errors.brandModel}</span>}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Monitor Section */}
-        <div className="form-section">
-          <h3 className="form-section-title">Monitor Details</h3>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Serial No. *</label>
-              <input
-                type="text"
-                name="monitor.serialNo"
-                value={formData.monitor.serialNo}
-                onChange={handleChange}
-                className={errors['monitor.serialNo'] ? 'error' : ''}
-              />
-              {errors['monitor.serialNo'] && 
-                <span className="error-message">{errors['monitor.serialNo']}</span>}
+        {type === 'Computers' && (
+          <>
+            {/* System Unit Section */}
+            <div className="form-section">
+              <h3 className="form-section-title">System Unit Details</h3>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Serial No. *</label>
+                  <input
+                    type="text"
+                    name="systemUnit.serialNo"
+                    value={formData.systemUnit.serialNo}
+                    onChange={handleChange}
+                    className={errors['systemUnit.serialNo'] ? 'error' : ''}
+                  />
+                  {errors['systemUnit.serialNo'] && 
+                    <span className="error-message">{errors['systemUnit.serialNo']}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label>Property No. *</label>
+                  <input
+                    type="text"
+                    name="systemUnit.propertyNo"
+                    value={formData.systemUnit.propertyNo}
+                    onChange={handleChange}
+                    className={errors['systemUnit.propertyNo'] ? 'error' : ''}
+                  />
+                  {errors['systemUnit.propertyNo'] && 
+                    <span className="error-message">{errors['systemUnit.propertyNo']}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label>Brand/Model *</label>
+                  <input
+                    type="text"
+                    name="systemUnit.brandModel"
+                    value={formData.systemUnit.brandModel}
+                    onChange={handleChange}
+                    className={errors['systemUnit.brandModel'] ? 'error' : ''}
+                  />
+                  {errors['systemUnit.brandModel'] && 
+                    <span className="error-message">{errors['systemUnit.brandModel']}</span>}
+                </div>
+              </div>
             </div>
 
-            <div className="form-group">
-              <label>Property No. *</label>
-              <input
-                type="text"
-                name="monitor.propertyNo"
-                value={formData.monitor.propertyNo}
-                onChange={handleChange}
-                className={errors['monitor.propertyNo'] ? 'error' : ''}
-              />
-              {errors['monitor.propertyNo'] && 
-                <span className="error-message">{errors['monitor.propertyNo']}</span>}
-            </div>
+            {/* Monitor Section */}
+            <div className="form-section">
+              <h3 className="form-section-title">Monitor Details</h3>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Serial No. *</label>
+                  <input
+                    type="text"
+                    name="monitor.serialNo"
+                    value={formData.monitor.serialNo}
+                    onChange={handleChange}
+                    className={errors['monitor.serialNo'] ? 'error' : ''}
+                  />
+                  {errors['monitor.serialNo'] && 
+                    <span className="error-message">{errors['monitor.serialNo']}</span>}
+                </div>
 
-            <div className="form-group">
-              <label>Brand/Model *</label>
-              <input
-                type="text"
-                name="monitor.brandModel"
-                value={formData.monitor.brandModel}
-                onChange={handleChange}
-                className={errors['monitor.brandModel'] ? 'error' : ''}
-              />
-              {errors['monitor.brandModel'] && 
-                <span className="error-message">{errors['monitor.brandModel']}</span>}
+                <div className="form-group">
+                  <label>Property No. *</label>
+                  <input
+                    type="text"
+                    name="monitor.propertyNo"
+                    value={formData.monitor.propertyNo}
+                    onChange={handleChange}
+                    className={errors['monitor.propertyNo'] ? 'error' : ''}
+                  />
+                  {errors['monitor.propertyNo'] && 
+                    <span className="error-message">{errors['monitor.propertyNo']}</span>}
+                </div>
+
+                <div className="form-group">
+                  <label>Brand/Model *</label>
+                  <input
+                    type="text"
+                    name="monitor.brandModel"
+                    value={formData.monitor.brandModel}
+                    onChange={handleChange}
+                    className={errors['monitor.brandModel'] ? 'error' : ''}
+                  />
+                  {errors['monitor.brandModel'] && 
+                    <span className="error-message">{errors['monitor.brandModel']}</span>}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {type === 'Laptops' && (
+          <div className="form-section">
+            <h3 className="form-section-title">Laptop Details</h3>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Serial No. *</label>
+                <input
+                  type="text"
+                  name="serialNo"
+                  value={formData.serialNo}
+                  onChange={handleChange}
+                  className={errors.serialNo ? 'error' : ''}
+                />
+                {errors.serialNo && 
+                  <span className="error-message">{errors.serialNo}</span>}
+              </div>
+
+              <div className="form-group">
+                <label>Property No. *</label>
+                <input
+                  type="text"
+                  name="propertyNo"
+                  value={formData.propertyNo}
+                  onChange={handleChange}
+                  className={errors.propertyNo ? 'error' : ''}
+                />
+                {errors.propertyNo && 
+                  <span className="error-message">{errors.propertyNo}</span>}
+              </div>
+
+              <div className="form-group">
+                <label>Brand/Model *</label>
+                <input
+                  type="text"
+                  name="brandModel"
+                  value={formData.brandModel}
+                  onChange={handleChange}
+                  className={errors.brandModel ? 'error' : ''}
+                />
+                {errors.brandModel && 
+                  <span className="error-message">{errors.brandModel}</span>}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Common Details Section */}
         <div className="form-section">

@@ -7,26 +7,61 @@ function OfficeSuppliesPage() {
   const categories = [
     { id: 'paper', name: 'Paper Products' },
     { id: 'writing', name: 'Writing Tools' },
-    { id: 'furniture', name: 'Furniture' },
-    { id: 'misc', name: 'Miscellaneous' }
   ];
 
-  // Commented out until implemented
-  /* const supplyColumns = {
-    ITEM: {
-      NAME: 'Item Name',
-      CATEGORY: 'Category',
-      QUANTITY: 'Stock Quantity'
+  // Sample data - replace with actual data from your API
+  const supplies = [
+    {
+      item: 'Bond Paper A4',
+      minInventory: 100,
+      quantity: 500,
+      units: '10',
+      purpose: 'Office Documentation',
+      requester: 'John Doe',
+      
     },
-    COMMON: {
-      UNIT_COST: 'UNIT COST',
-      DATE: 'DATE',
-      ACCT_PERSON: 'ACCT. PERSON',
-      STATUS: 'STATUS (AVAILABLE/OUT OF STOCK)',
-      LOCATION: 'LOCATION',
-      USER: 'USER'
-    }
-  }; */
+    {
+      item: 'Cartolina',
+      minInventory: 10,
+      quantity: 50,
+      units: '1',
+      purpose: 'Examination',
+      requester: 'Jane Smith',
+    },
+    // Add more items as needed
+  ];
+
+  const renderSuppliesTable = () => {
+    return (
+      <table className="inventory-table">
+        <thead>
+          <tr className="header-groups">
+            <th colSpan="6" className="header-group supplies">Office Supplies Inventory</th>
+          </tr>
+          <tr>
+            <th>Supply Item</th>
+            <th>Inventory Minimum</th>
+            <th>Quantity</th>
+            <th>Units</th>
+            <th>Purpose</th>
+            <th>Requester's Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {supplies.map((item, index) => (
+            <tr key={index}>
+              <td>{item.item}</td>
+              <td>{item.minInventory}</td>
+              <td>{item.quantity}</td>
+              <td>{item.units}</td>
+              <td>{item.purpose}</td>
+              <td>{item.requester}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
 
   return (
     <div className="office-supplies-page">
@@ -47,8 +82,8 @@ function OfficeSuppliesPage() {
           </button>
         ))}
       </div>
-      <div className="supplies-grid">
-        {/* Supply cards will be rendered here */}
+      <div className="inventory-list-container">
+        {renderSuppliesTable()}
       </div>
     </div>
   );

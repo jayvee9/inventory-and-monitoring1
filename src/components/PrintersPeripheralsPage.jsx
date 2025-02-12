@@ -19,10 +19,9 @@ function PrintersPeripheralsPage() {
       UNIT_COST: 'UNIT COST',
       DATE: 'DATE',
       ACCT_PERSON: 'ACCT. PERSON',
-      STATUS: 'STATUS (SERVICEABLE/UNSERVICEABLE)',
+      STATUS: 'STATUS  (SERVICEABLE/ UNSERVICEABLE)',
       LOCATION: 'LOCATION',
-      USER: 'USER',
-      REMARKS: 'REMARKS'
+      USER: 'USER'
     }
   };
 
