@@ -10,8 +10,14 @@ function InventoryList({ items, onSort, sortConfig, type }) {
   const safeItems = Array.isArray(items) ? items : [];
 
   const formatToPeso = (value) => {
-    if (!value || isNaN(value)) return '₱0.00';
+    // Remove any currency symbols and commas from string values
+    if (typeof value === 'string') {
+      value = value.replace(/[₱,]/g, '');
+    }
+    
     const number = parseFloat(value);
+    if (!value || isNaN(number)) return '₱0.00';
+    
     return new Intl.NumberFormat('en-PH', {
       style: 'currency',
       currency: 'PHP',

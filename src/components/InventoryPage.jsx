@@ -80,7 +80,7 @@ function InventoryPage({ type }) {
 
   return (
     <div className="container">
-      <h1>{type} Inventory and Monitoring</h1>
+      <h1>{type} Inventory</h1>
       
       {loading && (
         <div className="loading-spinner">Loading...</div>
