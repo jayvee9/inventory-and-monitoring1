@@ -74,7 +74,7 @@ function InventoryList({ items, onSort, sortConfig, type }) {
           <tr className="header-groups">
             <th colSpan="3" className="header-group system-unit">System Unit</th>
             <th colSpan="3" className="header-group monitor">Monitor</th>
-            <th colSpan="7" className="header-group details">Other Details</th>
+            <th colSpan="8" className="header-group details">Other Details</th>
           </tr>
           <tr>
             {/* System Unit Headers */}
@@ -94,6 +94,7 @@ function InventoryList({ items, onSort, sortConfig, type }) {
             <th onClick={() => onSort('status')}>Status</th>
             <th onClick={() => onSort('location')}>Location</th>
             <th onClick={() => onSort('user')}>User</th>
+            <th onClick={() => onSort('pcName')}>PC Name</th>
             <th onClick={() => onSort('remarks')}>Remarks</th>
           </tr>
         </thead>
@@ -112,6 +113,7 @@ function InventoryList({ items, onSort, sortConfig, type }) {
               <td className={getStatusClass(item.status)}>{item.status || '-'}</td>
               <td>{item.location || '-'}</td>
               <td>{item.user || '-'}</td>
+              <td>{item.pcName || '-'}</td>
               <td>{item.remarks || '-'}</td>
             </tr>
           ))}

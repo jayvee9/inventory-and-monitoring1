@@ -17,29 +17,16 @@ function InventoryPage({ type }) {
   const fetchItems = useCallback(async () => {
     try {
       setLoading(true);
-      let data = await sheetService.getAllItems(type);
-      
-      // Apply status filter
-      if (filters.STATUS) {
-        data = data.filter(item => 
-          item.status && item.status.trim().toUpperCase() === filters.STATUS.trim().toUpperCase()
-        );
-      }
-      
-      // Apply sort if needed
-      if (sortConfig.field) {
-        data = sheetService.sortItems(data, sortConfig.field, sortConfig.direction);
-      }
-      
+      const data = await sheetService.getAllItems(type);
       setInventoryItems(data);
       setError(null);
     } catch (err) {
-      setError(`Failed to fetch ${type} items`);
-      console.error(err);
+      console.error('Error fetching inventory:', err);
+      setError('Failed to load inventory data');
     } finally {
       setLoading(false);
     }
-  }, [type, filters, sortConfig]);
+  }, [type]);
 
   useEffect(() => {
     fetchItems();
@@ -66,15 +53,21 @@ function InventoryPage({ type }) {
   const addInventoryItem = async (newItem) => {
     try {
       setLoading(true);
+      console.log('Adding new item:', newItem);
+      
       await sheetService.addItem(newItem, type);
+      
       setSubmitStatus({
         show: true,
         message: `${type} item added successfully!`,
         type: 'success'
       });
+      
       setShowAddForm(false);
       setRefreshTrigger(prev => prev + 1);
+      
     } catch (error) {
+      console.error('Error adding item:', error);
       setSubmitStatus({
         show: true,
         message: `Failed to add ${type} item: ${error.message}`,
@@ -88,6 +81,10 @@ function InventoryPage({ type }) {
   return (
     <div className="container">
       <h1>{type} Inventory and Monitoring</h1>
+      
+      {loading && (
+        <div className="loading-spinner">Loading...</div>
+      )}
       
       {error && (
         <div className="error-alert">
@@ -103,63 +100,38 @@ function InventoryPage({ type }) {
         </div>
       )}
 
-      <div className="search-filter-container">
-        <input
-          type="text"
-          placeholder={`Search ${type.toLowerCase()}...`}
-          value={searchTerm}
-          onChange={handleSearch}
-          className="search-input"
-        />
-        
-        <select
-          onChange={(e) => handleFilter('STATUS', e.target.value)}
-          className="filter-select"
-        >
-          <option value="">All Status</option>
-          <option value="SERVICEABLE">SERVICEABLE</option>
-          <option value="UNSERVICEABLE">UNSERVICEABLE</option>
-        </select>
-      </div>
-      
       <div className="actions">
         <button 
-          className="btn btn-secondary"
-          onClick={() => setRefreshTrigger(prev => prev + 1)}
-          disabled={loading}
-        >
-          ↻ Refresh Data
-        </button>
-        <button 
           className="btn btn-primary"
-          onClick={() => setShowAddForm(!showAddForm)}
+          onClick={() => setShowAddForm(true)}
           disabled={loading}
         >
-          {showAddForm ? '✕ Close Form' : `+ Add New ${type}`}
+          Add New {type}
         </button>
       </div>
 
       {showAddForm && (
-        <AddInventoryForm 
+        <AddInventoryForm
+          type={type}
           onSubmit={addInventoryItem}
           onCancel={() => setShowAddForm(false)}
-          disabled={loading}
-          type={type}
         />
       )}
 
-      {loading ? (
-        <div className="loading-spinner">Loading...</div>
-      ) : (
-        <InventoryList 
+      {!loading && (
+        <InventoryList
           items={inventoryItems}
+          type={type}
           onSort={handleSort}
           sortConfig={sortConfig}
-          type={type}
+          searchTerm={searchTerm}
+          onSearch={handleSearch}
+          filters={filters}
+          onFilter={handleFilter}
         />
       )}
     </div>
   );
 }
 
-export default InventoryPage; 
+export default InventoryPage;

@@ -117,7 +117,17 @@ export const sheetService = {
       
       // Map the data based on type
       const processedData = data.map((item, index) => {
-        if (type === 'PRINTERS') {
+        if (type === 'SUPPLIES') {
+          return {
+            [HEADERS.SUPPLIES.ITEM]: item['Item'],
+            [HEADERS.SUPPLIES.MIN_INVENTORY]: item['Inventory Minimum'],
+            [HEADERS.SUPPLIES.QUANTITY]: item['Quantity'],
+            [HEADERS.SUPPLIES.UNITS]: item['Units'],
+            [HEADERS.SUPPLIES.PURPOSE]: item['Purpose'],
+            [HEADERS.SUPPLIES.REQUESTER]: item['Requester'],
+            _rowIndex: index + 0
+          };
+        } else if (type === 'PRINTERS') {
           return {
             type: item['Type'],
             serialNo: item['Serial No.'],
@@ -146,6 +156,7 @@ export const sheetService = {
             status: item['STATUS  (SERVICEABLE/ UNSERVICEABLE)'],
             location: item['LOCATION'],
             user: item['USER'],
+            pcName: item['PCNAME'],
             remarks: item['REMARKS'],
             _rowIndex: index + 0
           };
@@ -295,64 +306,73 @@ export const sheetService = {
     return normalizedStatus;
   },
 
-  addItem: async (item, type = 'COMPUTERS') => {
+  addItem: async (item, type) => {
     try {
-      console.log('Received item in sheetService:', item);
-      
+      const url = getAuthenticatedUrl(type);
       let formattedItem;
       
-      if (type === 'PRINTERS') {
-        formattedItem = {
-          'Type': item.type || '',
-          'Serial No.': item.serialNo || '',
-          'Property No.': item.propertyNo || '',
-          'Brand/Model': item.brandModel || '',
-          'UNIT COST': item.unitCost || '',
-          'DATE': item.date || '',
-          'ACCT. PERSON': item.accountablePerson || '',
-          'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status || '',
-          'LOCATION': item.location || '',
-          'USER': item.user || ''
-        };
-      } else if (type === 'Laptops') {
-        formattedItem = {
-          'Serial No.': item.serialNo || '',
-          'Property No.': item.propertyNo || '',
-          'Brand/Model': item.brandModel || '',
-          'UNIT COST': item.unitCost || '',
-          'DATE': item.date || '',
-          'ACCT. PERSON': item.accountablePerson || '',
-          'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status || '',
-          'LOCATION': item.location || '',
-          'USER': item.user || '',
-          'REMARKS': item.remarks || '',
-          'PCNAME': item.pcName || ''
-        };
-      } else {
-        // Original computer formatting
-        formattedItem = {
-          'Serial No.': item.systemUnit?.serialNo || '',
-          'Property No.': item.systemUnit?.propertyNo || '',
-          'Brand/Model': item.systemUnit?.brandModel || '',
-          'Monitor Serial No.': item.monitor?.serialNo || '',
-          'Monitor Property No.': item.monitor?.propertyNo || '',
-          'Monitor Brand/Model': item.monitor?.brandModel || '',
-          'UNIT COST': item.unitCost || '',
-          'DATE': item.date || '',
-          'ACCT. PERSON': item.accountablePerson || '',
-          'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status || '',
-          'LOCATION': item.location || '',
-          'USER': item.user || '',
-          'REMARKS': item.remarks || '',
-          'PCNAME': item.pcName || ''
-        };
+      // Normalize type to uppercase for consistent comparison
+      const normalizedType = type.toUpperCase();
+
+      switch (normalizedType) {
+        case 'SUPPLIES':
+          formattedItem = {
+            'Item': item['Item'],
+            'Inventory Minimum': item['Inventory Minimum'],
+            'Quantity': item['Quantity'],
+            'Units': item['Units'],
+            'Purpose': item['Purpose'],
+            'Requester': item['Requester']
+          };
+          break;
+
+        case 'PRINTERS':
+          formattedItem = {
+            'Type': item.type,
+            'Serial No.': item.serialNo,
+            'Property No.': item.propertyNo,
+            'Brand/Model': item.brandModel,
+            'UNIT COST': item.unitCost,
+            'DATE': item.date,
+            'ACCT. PERSON': item.accountablePerson,
+            'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status,
+            'LOCATION': item.location,
+            'USER': item.user
+          };
+          break;
+
+        case 'COMPUTERS':
+        case 'LAPTOPS':
+          formattedItem = {
+            'Serial No.': item.serialNo || item.systemUnit?.serialNo,
+            'Property No.': item.propertyNo || item.systemUnit?.propertyNo,
+            'Brand/Model': item.brandModel || item.systemUnit?.brandModel,
+            'Monitor Serial No.': item.monitorSerialNo || item.monitor?.serialNo,
+            'Monitor Property No.': item.monitorPropertyNo || item.monitor?.propertyNo,
+            'Monitor Brand/Model': item.monitorBrandModel || item.monitor?.brandModel,
+            'UNIT COST': item.unitCost,
+            'DATE': item.date,
+            'ACCT. PERSON': item.accountablePerson,
+            'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status,
+            'LOCATION': item.location,
+            'USER': item.user,
+            'PCNAME': item.pcName,
+            'REMARKS': item.remarks
+          };
+          break;
+
+        default:
+          throw new Error(`Unknown type: ${type}. Expected COMPUTERS, LAPTOPS, PRINTERS, or SUPPLIES`);
       }
 
-      console.log('Formatted item for API:', formattedItem);
+      console.log('Sending formatted item:', formattedItem);
 
-      const response = await fetch(getAuthenticatedUrl(type), {
+      const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify(formattedItem)
       });
 
@@ -360,7 +380,7 @@ export const sheetService = {
         const errorText = await response.text();
         throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
-      
+
       return true;
     } catch (error) {
       console.error('Error adding item:', error);

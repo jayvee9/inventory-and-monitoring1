@@ -119,12 +119,25 @@ function AddInventoryForm({ onSubmit, onCancel, type }) {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validateForm();
     
     if (Object.keys(newErrors).length === 0) {
-      onSubmit(formData);
+      try {
+        // Format dates to match sheet format
+        const formattedData = {
+          ...formData,
+          date: new Date(formData.date).toLocaleDateString('en-US'),
+          status: formData.status.toUpperCase(),
+          unitCost: formData.unitCost.toString()
+        };
+        
+        await onSubmit(formattedData);
+        resetForm();
+      } catch (error) {
+        setErrors({ submit: error.message });
+      }
     } else {
       setErrors(newErrors);
     }
@@ -137,6 +150,11 @@ function AddInventoryForm({ onSubmit, onCancel, type }) {
       ...prev,
       status
     }));
+  };
+
+  const resetForm = () => {
+    setFormData(initialState);
+    setErrors({});
   };
 
   return (
