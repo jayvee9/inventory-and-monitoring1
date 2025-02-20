@@ -1,0 +1,18 @@
+{
+  "files": {
+    "main.css": "/inventory-and-monitoring1/static/css/main.97cb2fc0.css",
+    "main.js": "/inventory-and-monitoring1/static/js/main.463cc3a1.js",
+    "static/js/568.a96659c0.chunk.js": "/inventory-and-monitoring1/static/js/568.a96659c0.chunk.js",
+    "static/media/peripheral.png": "/inventory-and-monitoring1/static/media/peripheral.0b99860c5103dd4351d6.png",
+    "static/media/scanner.png": "/inventory-and-monitoring1/static/media/scanner.3fb03cfea8a0d40256a1.png",
+    "static/media/printer.png": "/inventory-and-monitoring1/static/media/printer.289330e3587a0cafacd0.png",
+    "index.html": "/inventory-and-monitoring1/index.html",
+    "main.97cb2fc0.css.map": "/inventory-and-monitoring1/static/css/main.97cb2fc0.css.map",
+    "main.463cc3a1.js.map": "/inventory-and-monitoring1/static/js/main.463cc3a1.js.map",
+    "568.a96659c0.chunk.js.map": "/inventory-and-monitoring1/static/js/568.a96659c0.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.97cb2fc0.css",
+    "static/js/main.463cc3a1.js"
+  ]
+}
