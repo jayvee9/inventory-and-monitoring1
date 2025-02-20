@@ -1,18 +1,20 @@
 /* Modern CSS Reset and Variables */
 :root {
   /* Enhanced Color System */
-  --primary-color: #2563eb;
-  --primary-dark: #1e40af;
-  --primary-light: #60a5fa;
-  --secondary-color: #1f2937;
-  --success-color: #059669;
-  --danger-color: #dc2626;
+  --primary-color: #007bff;
+  --primary-dark: #0056b3;
+  --primary-light: #66b3ff;
+  --secondary-color: #343a40;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
   --warning-color: #d97706;
   --background-primary: #ffffff;
   --background-secondary: #f8fafc;
   --text-primary: #0f172a;
   --text-secondary: #475569;
-  --border-color: #e2e8f0;
+  --border-color: #dee2e6;
+  --border-radius: 0.25rem;
+  --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
   
   /* Enhanced Typography */
   --font-primary: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -610,4 +612,126 @@ h2.section-title {
     text-shadow: none;
   }
   
+}
+
+/* New styles from the code block */
+:root {
+  --background-color: #f8f9fa;
+  --text-color: #212529;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.nav-menu {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-menu li {
+  display: inline;
+}
+
+.nav-menu a {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  transition: background-color 0.3s;
+}
+
+.nav-menu a:hover {
+  background-color: var(--primary-dark);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.card {
+  background-color: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+}
+
+.card-header {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.card-body {
+  font-size: 1rem;
+}
+
+.button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: var(--primary-dark);
+}
+
+.alert {
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1rem;
+}
+
+.alert.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  position: relative;
+  bottom: 0;
+  width: 100%;
 }
