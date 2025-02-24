@@ -1,5 +1,5 @@
 {
-  "homepage": "https://jayvee9.github.io/inventory-and-monitoring1",
+  "homepage": "https://jayvee9.github.io/inventory-and-monitoring1/",
   "name": "inventory-and-monitoring",
   "version": "0.1.0",
   "private": true,
@@ -17,7 +17,7 @@
   "proxy": "https://api.sheetbest.com",
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "main -d build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
