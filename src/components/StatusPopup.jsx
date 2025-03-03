@@ -31,13 +31,8 @@ function StatusPopup({ status, date, isOpen, onClose, disposalInfo }) {
           <>
             <h3 className="status-title unserviceable">Unserviceable Unit</h3>
             <div className="disposal-info">
-              <p><strong>Status:</strong> {disposalInfo?.disposed ? 'Disposed' : 'In Storage'}</p>
-              {disposalInfo?.disposed ? (
-                <p><strong>Disposal Date:</strong> {disposalInfo.disposalDate}</p>
-              ) : (
-                <p><strong>Storage Location:</strong> {disposalInfo?.location || 'Warehouse'}</p>
-              )}
-              
+              <p><strong>Status:</strong> {disposalInfo?.forRepair ? 'For Repair' : 'For Disposal'}</p>
+              <p><strong>Location:</strong> {disposalInfo?.location || 'Warehouse'}</p>
             </div>
           </>
         )}

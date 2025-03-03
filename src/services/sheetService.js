@@ -107,7 +107,7 @@ export const sheetService = {
     }
   },
 
-  getAllItems: async (type = 'COMPUTERS', forceFresh = false) => {
+  getAllItems: async (type = 'SUPPLIES', forceFresh = false) => {
     try {
       const url = `${getAuthenticatedUrl(type)}?_t=${Date.now()}`;
       const response = await fetch(url);
@@ -119,30 +119,31 @@ export const sheetService = {
       const processedData = data.map((item, index) => {
         if (type === 'SUPPLIES') {
           return {
-            [HEADERS.SUPPLIES.ITEM]: item['Item'],
-            [HEADERS.SUPPLIES.MIN_INVENTORY]: item['Inventory Minimum'],
-            [HEADERS.SUPPLIES.QUANTITY]: item['Quantity'],
-            [HEADERS.SUPPLIES.UNITS]: item['Units'],
-            [HEADERS.SUPPLIES.PURPOSE]: item['Purpose'],
-            [HEADERS.SUPPLIES.REQUESTER]: item['Requester'],
-            _rowIndex: index + 0
-          };
-        } else if (type === 'PRINTERS') {
-          return {
-            type: item['Type'],
-            serialNo: item['Serial No.'],
-            propertyNo: item['Property No.'],
-            brandModel: item['Brand/Model'],
-            unitCost: item['UNIT COST'],
-            date: item['DATE'],
-            accountablePerson: item['ACCT. PERSON'],
-            status: item['STATUS  (SERVICEABLE/ UNSERVICEABLE)'],
-            location: item['LOCATION'],
-            user: item['USER'],
+            itemSpecifications: item['Item & Specifications'] || '',
+            unitOfMeasure: item['Unit of Measure'] || '',
+            beginningBalance: parseFloat(item['Beginning Balance as of 02/01/2025']) || 0,
+            purchasesForMonth: parseFloat(item['Purchases for the Month']) || 0,
+            totalBalance: parseFloat(item['Total Balance']) || 0,
+            adjustment: parseFloat(item['ADJUSTMENT']) || 0,
+            examination: parseFloat(item['EXAMINATION']) || 0,
+            lrd: parseFloat(item['LRD']) || 0,
+            application: parseFloat(item['APPLICATION']) || 0,
+            regulation: parseFloat(item['REGULATION']) || 0,
+            registration: parseFloat(item['REGISTRATION']) || 0,
+            admin: parseFloat(item['ADMIN']) || 0,
+            ord: parseFloat(item['ORD']) || 0,
+            valencia: parseFloat(item['VALENCIA']) || 0,
+            iligan: parseFloat(item['ILIGAN']) || 0,
+            totalReleases: parseFloat(item['Total Releases']) || 0,
+            endingBalance: parseFloat(item['Ending Balance as of 02/28/2025']) || 0,
+            unitCost: parseFloat(item['UNIT COST']) || 0,
+            totalAmount: parseFloat(item['TOTAL AMOUNT']) || 0,
+            psPriceDBM: parseFloat(item['PS/DBM PRICE']) || 0,
+            outsidePSPrice: parseFloat(item['OUTSIDE PS PRICE']) || 0,
             _rowIndex: index + 0
           };
         } else {
-          // Existing mapping for computers and laptops
+          // Keep existing mapping for computers, laptops, and printers
           return {
             serialNo: item['Serial No.'],
             propertyNo: item['Property No.'],
@@ -317,12 +318,27 @@ export const sheetService = {
       switch (normalizedType) {
         case 'SUPPLIES':
           formattedItem = {
-            'Item': item['Item'],
-            'Inventory Minimum': item['Inventory Minimum'],
-            'Quantity': item['Quantity'],
-            'Units': item['Units'],
-            'Purpose': item['Purpose'],
-            'Requester': item['Requester']
+            'Item & Specifications': item.itemSpecifications,
+            'Unit of Measure': item.unitOfMeasure,
+            'Beginning Balance as of 02/01/2025': item.beginningBalance,
+            'Purchases for the Month': item.purchasesForMonth,
+            'Total Balance': item.totalBalance,
+            'Adjustment': item.adjustment,
+            'Examination': item.examination,
+            'LRD': item.lrd,
+            'Application': item.application,
+            'Regulation': item.regulation,
+            'Registration': item.registration,
+            'Admin': item.admin,
+            'ORD': item.ord,
+            'Valencia': item.valencia,
+            'Iligan': item.iligan,
+            'Total Releases': item.totalReleases,
+            'Ending Balance as of 02/28/2025': item.endingBalance,
+            'Unit Cost': item.unitCost,
+            'Total Amount': item.totalAmount,
+            'PS/DBM Price': item.psPriceDBM,
+            'Outside PS Price': item.outsidePSPrice
           };
           break;
 
@@ -530,6 +546,5 @@ export const sheetService = {
     });
   }
 };
-
 // Export the valid status values for use in components
 export const STATUS_OPTIONS = VALID_STATUS; 

@@ -1,30 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { sheetService, HEADERS } from '../services/sheetService';
+import { sheetService } from '../services/sheetService';
 import RequestSupplyForm from './RequestSupplyForm';
 import './OfficeSuppliesPage.css';
 
 function OfficeSuppliesPage() {
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [supplies, setSupplies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [statusMessage, setStatusMessage] = useState({ show: false, type: '', message: '' });
 
-  const categories = [
-    { id: 'paper', name: 'Paper Products' },
-    { id: 'writing', name: 'Writing Tools' },
-    { id: 'office', name: 'Office Equipment' },
-    { id: 'storage', name: 'Storage Items' }
-  ];
-
-  // Move fetchSupplies outside useEffect so it can be reused
   const fetchSupplies = async () => {
     try {
       setLoading(true);
-      console.log('Fetching supplies data...');
       const data = await sheetService.getAllItems('SUPPLIES');
-      console.log('Received supplies data:', data);
       setSupplies(data);
       setError(null);
     } catch (err) {
@@ -35,31 +24,34 @@ function OfficeSuppliesPage() {
     }
   };
 
-  useEffect(() => {
-    fetchSupplies();
-  }, []);
-
-  const filteredSupplies = supplies.filter(item => {
-    if (selectedCategory === 'all') return true;
-    return item[HEADERS.SUPPLIES.ITEM]?.toLowerCase().includes(selectedCategory.toLowerCase());
-  });
-
   const handleRequestSubmit = async (requestData) => {
     try {
       setLoading(true);
-      console.log('Submitting supply request...', requestData);
       
-      // Format the data to exactly match the sheet column names
+      // Format the data to match the new sheet column names
       const formattedData = {
-        'Item': requestData.itemName,
-        'Inventory Minimum': requestData.inventoryMinimum.toString(),
-        'Quantity': requestData.quantity.toString(),
-        'Units': requestData.units,
-        'Purpose': requestData.purpose,
-        'Requester': requestData.requesterName
+        'Item & Specifications': requestData.itemSpecifications,
+        'Unit of Measure': requestData.unitOfMeasure,
+        'Beginning Balance as of 02/01/2025': requestData.beginningBalance,
+        'Purchases for the Month': requestData.purchasesForMonth,
+        'Total Balance': requestData.totalBalance,
+        'Adjustment': requestData.adjustment,
+        'Examination': requestData.examination,
+        'LRD': requestData.lrd,
+        'Application': requestData.application,
+        'Regulation': requestData.regulation,
+        'Registration': requestData.registration,
+        'Admin': requestData.admin,
+        'ORD': requestData.ord,
+        'Valencia': requestData.valencia,
+        'Iligan': requestData.iligan,
+        'Total Releases': requestData.totalReleases,
+        'Ending Balance as of 02/28/2025': requestData.endingBalance,
+        'Unit Cost': requestData.unitCost,
+        'Total Amount': requestData.totalAmount,
+        'PS/DBM Price': requestData.psPriceDBM,
+        'Outside PS Price': requestData.outsidePSPrice
       };
-
-      console.log('Formatted data:', formattedData);
       
       const response = await sheetService.addItem(formattedData, 'SUPPLIES');
       
@@ -68,23 +60,27 @@ function OfficeSuppliesPage() {
         setStatusMessage({
           show: true,
           type: 'success',
-          message: 'Supply request submitted successfully!'
+          message: 'Supply item added successfully!'
         });
         
         // Refresh the supplies list
         await fetchSupplies();
       }
     } catch (err) {
-      console.error('Error submitting supply request:', err);
+      console.error('Error adding supply item:', err);
       setStatusMessage({
         show: true,
         type: 'error',
-        message: 'Failed to submit supply request: ' + err.message
+        message: 'Failed to add supply item: ' + err.message
       });
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchSupplies();
+  }, []);
 
   const renderSuppliesTable = () => {
     if (loading) {
@@ -96,33 +92,65 @@ function OfficeSuppliesPage() {
     }
 
     return (
-      <table className="inventory-table">
-        <thead>
-          <tr className="header-groups">
-            <th colSpan="6" className="header-group supplies">Office Supplies Inventory</th>
-          </tr>
-          <tr>
-            <th>Supply Item</th>
-            <th>Inventory Minimum</th>
-            <th>Quantity</th>
-            <th>Units</th>
-            <th>Purpose</th>
-            <th>Requester's Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredSupplies.map((item, index) => (
-            <tr key={index}>
-              <td>{item[HEADERS.SUPPLIES.ITEM] || '-'}</td>
-              <td>{item[HEADERS.SUPPLIES.MIN_INVENTORY] || '-'}</td>
-              <td>{item[HEADERS.SUPPLIES.QUANTITY] || '-'}</td>
-              <td>{item[HEADERS.SUPPLIES.UNITS] || '-'}</td>
-              <td>{item[HEADERS.SUPPLIES.PURPOSE] || '-'}</td>
-              <td>{item[HEADERS.SUPPLIES.REQUESTER] || '-'}</td>
+      <div className="table-container">
+        <table className="inventory-table">
+          <thead>
+            <tr className="header-groups">
+              <th colSpan="21" className="header-group supplies">Office Supplies Inventory</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+            <tr>
+              <th>Item & Specifications</th>
+              <th>Unit of Measure</th>
+              <th>Beginning Balance as of 02/01/2025</th>
+              <th>Purchases for the Month</th>
+              <th>Total Balance</th>
+              <th>Adjustment</th>
+              <th>Examination</th>
+              <th>LRD</th>
+              <th>Application</th>
+              <th>Regulation</th>
+              <th>Registration</th>
+              <th>Admin</th>
+              <th>ORD</th>
+              <th>Valencia</th>
+              <th>Iligan</th>
+              <th>Total Releases</th>
+              <th>Ending Balance as of 02/28/2025</th>
+              <th>Unit Cost</th>
+              <th>Total Amount</th>
+              <th>PS/DBM Price</th>
+              <th>Outside PS Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {supplies.map((item, index) => (
+              <tr key={index}>
+                <td>{item.itemSpecifications || '-'}</td>
+                <td>{item.unitOfMeasure || '-'}</td>
+                <td>{item.beginningBalance || '-'}</td>
+                <td>{item.purchasesForMonth || '-'}</td>
+                <td>{item.totalBalance || '-'}</td>
+                <td>{item.adjustment || '-'}</td>
+                <td>{item.examination || '-'}</td>
+                <td>{item.lrd || '-'}</td>
+                <td>{item.application || '-'}</td>
+                <td>{item.regulation || '-'}</td>
+                <td>{item.registration || '-'}</td>
+                <td>{item.admin || '-'}</td>
+                <td>{item.ord || '-'}</td>
+                <td>{item.valencia || '-'}</td>
+                <td>{item.iligan || '-'}</td>
+                <td>{item.totalReleases || '-'}</td>
+                <td>{item.endingBalance || '-'}</td>
+                <td>{item.unitCost || '-'}</td>
+                <td>{item.totalAmount || '-'}</td>
+                <td>{item.psPriceDBM || '-'}</td>
+                <td>{item.outsidePSPrice || '-'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     );
   };
 
@@ -134,7 +162,7 @@ function OfficeSuppliesPage() {
           className="btn btn-primary"
           onClick={() => setShowRequestForm(true)}
         >
-          + Request New Item
+          + Add New Item
         </button>
       </div>
 
@@ -166,23 +194,6 @@ function OfficeSuppliesPage() {
         </div>
       )}
 
-      <div className="category-filters">
-        <button 
-          className={`category-btn ${selectedCategory === 'all' ? 'active' : ''}`}
-          onClick={() => setSelectedCategory('all')}
-        >
-          All Items
-        </button>
-        {categories.map(category => (
-          <button
-            key={category.id}
-            className={`category-btn ${selectedCategory === category.id ? 'active' : ''}`}
-            onClick={() => setSelectedCategory(category.id)}
-          >
-            {category.name}
-          </button>
-        ))}
-      </div>
       <div className="inventory-list-container">
         {renderSuppliesTable()}
       </div>

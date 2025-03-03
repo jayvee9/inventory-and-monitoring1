@@ -46,6 +46,18 @@
   flex-grow: 2;
 }
 
+.inventory-table {
+  width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.inventory-table th,
+.inventory-table td {
+  padding: 8px;
+  min-width: 120px;
+}
+
 .inventory-table th {
   background-color: var(--background-secondary);
   font-weight: 600;

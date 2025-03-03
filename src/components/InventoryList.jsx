@@ -1,16 +1,99 @@
 import './InventoryList.css';
 import React, { useState } from 'react';
 import StatusPopup from './StatusPopup';
-// import { HEADERS } from '../services/sheetService';
 
-function InventoryList({ items, onSort, sortConfig, type }) {
+const SUPPLIES_HEADERS = [
+  { key: 'itemSpecifications', label: 'Item & Specifications' },
+  { key: 'unitOfMeasure', label: 'Unit of Measure' },
+  { key: 'beginningBalance', label: 'Beginning Balance as of 02/01/2025' },
+  { key: 'purchasesForMonth', label: 'Purchases for the Month' },
+  { key: 'totalBalance', label: 'Total Balance' },
+  { key: 'adjustment', label: 'Adjustment' },
+  { key: 'examination', label: 'Examination' },
+  { key: 'lrd', label: 'LRD' },
+  { key: 'application', label: 'Application' },
+  { key: 'regulation', label: 'Regulation' },
+  { key: 'registration', label: 'Registration' },
+  { key: 'admin', label: 'Admin' },
+  { key: 'ord', label: 'ORD' },
+  { key: 'valencia', label: 'Valencia' },
+  { key: 'iligan', label: 'Iligan' },
+  { key: 'totalReleases', label: 'Total Releases' },
+  { key: 'endingBalance', label: 'Ending Balance as of 02/28/2025' },
+  { key: 'unitCost', label: 'Unit Cost' },
+  { key: 'totalAmount', label: 'Total Amount' },
+  { key: 'psPriceDBM', label: 'PS/DBM Price' },
+  { key: 'outsidePSPrice', label: 'Outside PS Price' }
+];
+
+const COMPUTER_HEADERS = [
+  { key: 'serialNo', label: 'Serial No.' },
+  { key: 'propertyNo', label: 'Property No.' },
+  { key: 'brandModel', label: 'Brand/Model' },
+  { key: 'monitorSerialNo', label: 'Monitor Serial No.' },
+  { key: 'monitorPropertyNo', label: 'Monitor Property No.' },
+  { key: 'monitorBrandModel', label: 'Monitor Brand/Model' },
+  { key: 'unitCost', label: 'UNIT COST' },
+  { key: 'date', label: 'DATE' },
+  { key: 'accountablePerson', label: 'ACCT. PERSON' },
+  { key: 'status', label: 'STATUS  (SERVICEABLE/ UNSERVICEABLE)' },
+  { key: 'location', label: 'LOCATION' },
+  { key: 'user', label: 'USER' },
+  { key: 'pcName', label: 'PCNAME' },
+  { key: 'remarks', label: 'REMARKS' }
+];
+
+const LAPTOP_HEADERS = [
+  { key: 'serialNo', label: 'Serial No.' },
+  { key: 'propertyNo', label: 'Property No.' },
+  { key: 'brandModel', label: 'Brand/Model' },
+  { key: 'unitCost', label: 'UNIT COST' },
+  { key: 'date', label: 'DATE' },
+  { key: 'accountablePerson', label: 'ACCT. PERSON' },
+  { key: 'status', label: 'STATUS  (SERVICEABLE/ UNSERVICEABLE)' },
+  { key: 'location', label: 'LOCATION' },
+  { key: 'user', label: 'USER' },
+  { key: 'pcName', label: 'PCNAME' },
+  { key: 'remarks', label: 'REMARKS' }
+];
+
+const PRINTER_HEADERS = [
+  { key: 'serialNo', label: 'Serial No.' },
+  { key: 'propertyNo', label: 'Property No.' },
+  { key: 'brandModel', label: 'Brand/Model' },
+  { key: 'unitCost', label: 'UNIT COST' },
+  { key: 'date', label: 'DATE' },
+  { key: 'accountablePerson', label: 'ACCT. PERSON' },
+  { key: 'status', label: 'STATUS  (SERVICEABLE/ UNSERVICEABLE)' },
+  { key: 'location', label: 'LOCATION' },
+  { key: 'user', label: 'USER' },
+  { key: 'remarks', label: 'REMARKS' }
+];
+
+const InventoryList = ({ items, onSort, sortConfig, type }) => {
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const safeItems = Array.isArray(items) ? items : [];
+  
+  // Choose headers based on type
+  const getHeaders = () => {
+    switch(type) {
+      case 'SUPPLIES':
+        return SUPPLIES_HEADERS;
+      case 'LAPTOPS':
+        return LAPTOP_HEADERS;
+      case 'PRINTERS':
+        return PRINTER_HEADERS;
+      default:
+        return COMPUTER_HEADERS;
+    }
+  };
+
+  const headers = getHeaders();
 
   const formatToPeso = (value) => {
-    // Remove any currency symbols and commas from string values
     if (typeof value === 'string') {
       value = value.replace(/[₱,]/g, '');
     }
@@ -20,147 +103,73 @@ function InventoryList({ items, onSort, sortConfig, type }) {
     
     return new Intl.NumberFormat('en-PH', {
       style: 'currency',
-      currency: 'PHP',
-      minimumFractionDigits: 2
+      currency: 'PHP'
     }).format(number);
   };
 
-  const getStatusClass = (status) => {
-    if (!status || typeof status !== 'string') return '';
-    const statusLower = status.trim().toUpperCase();
-    return statusLower === 'SERVICEABLE' ? 'serviceable' : 'unserviceable';
-  };
-
-  // Remove getSafeValue if not being used
-  /* const getSafeValue = (item, key, defaultValue = '-') => {
-    if (!item || !key) return defaultValue;
-    return item[key] || defaultValue;
-  }; */
-
-  const handleStatusClick = (status, date, remarks) => {
-    setSelectedStatus({ status, date, disposalInfo: { remarks, disposed: remarks?.toLowerCase().includes('disposed') } });
+  const handleStatusClick = (status, date) => {
+    setSelectedStatus(status);
+    setSelectedDate(date);
     setIsPopupOpen(true);
   };
 
-  const renderPrintersTable = () => {
-    return (
-      <table className="inventory-table">
-        <thead>
-          <tr className="header-groups">
-            <th colSpan="10" className="header-group printers-peripherals">Printers and Peripherals Inventory</th>
-          </tr>
-          <tr>
-            <th onClick={() => onSort('type')}>Type</th>
-            <th onClick={() => onSort('serialNo')}>Serial No.</th>
-            <th onClick={() => onSort('propertyNo')}>Property No.</th>
-            <th onClick={() => onSort('brandModel')}>Brand/Model</th>
-            <th onClick={() => onSort('unitCost')}>UNIT COST</th>
-            <th onClick={() => onSort('date')}>DATE</th>
-            <th onClick={() => onSort('accountablePerson')}>ACCT. PERSON</th>
-            <th onClick={() => onSort('status')}>STATUS</th>
-            <th onClick={() => onSort('location')}>LOCATION</th>
-            <th onClick={() => onSort('user')}>USER</th>
-          </tr>
-        </thead>
-        <tbody>
-          {safeItems.map((item, index) => (
-            <tr key={index}>
-              <td>{item.type || '-'}</td>
-              <td>{item.serialNo || '-'}</td>
-              <td>{item.propertyNo || '-'}</td>
-              <td>{item.brandModel || '-'}</td>
-              <td>{formatToPeso(item.unitCost)}</td>
-              <td>{item.date || '-'}</td>
-              <td>{item.accountablePerson || '-'}</td>
-              <td 
-                className={getStatusClass(item.status)}
-                onClick={() => handleStatusClick(item.status, item.date, item.remarks)}
-                style={{ cursor: 'pointer' }}
-              >
-                {item.status || '-'}
-              </td>
-              <td>{item.location || '-'}</td>
-              <td>{item.user || '-'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  };
-
-  const renderComputerTable = () => {
-    return (
-      <table className="inventory-table">
-        <thead>
-          <tr className="header-groups">
-            <th colSpan="3" className="header-group system-unit">System Unit</th>
-            <th colSpan="3" className="header-group monitor">Monitor</th>
-            <th colSpan="8" className="header-group details">Other Details</th>
-          </tr>
-          <tr>
-            {/* System Unit Headers */}
-            <th onClick={() => onSort('serialNo')}>Serial No.</th>
-            <th onClick={() => onSort('propertyNo')}>Property No.</th>
-            <th onClick={() => onSort('brandModel')}>Brand/Model</th>
-            
-            {/* Monitor Headers */}
-            <th onClick={() => onSort('monitorSerialNo')}>Serial No.</th>
-            <th onClick={() => onSort('monitorPropertyNo')}>Property No.</th>
-            <th onClick={() => onSort('monitorBrandModel')}>Brand/Model</th>
-            
-            {/* Other Details Headers */}
-            <th onClick={() => onSort('unitCost')}>Unit Cost</th>
-            <th onClick={() => onSort('date')}>Date</th>
-            <th onClick={() => onSort('accountablePerson')}>Acct. Person</th>
-            <th onClick={() => onSort('status')}>Status</th>
-            <th onClick={() => onSort('location')}>Location</th>
-            <th onClick={() => onSort('user')}>User</th>
-            <th onClick={() => onSort('pcName')}>PC Name</th>
-            <th onClick={() => onSort('remarks')}>Remarks</th>
-          </tr>
-        </thead>
-        <tbody>
-          {safeItems.map((item, index) => (
-            <tr key={index}>
-              <td>{item.serialNo || '-'}</td>
-              <td>{item.propertyNo || '-'}</td>
-              <td>{item.brandModel || '-'}</td>
-              <td>{item.monitorSerialNo || '-'}</td>
-              <td>{item.monitorPropertyNo || '-'}</td>
-              <td>{item.monitorBrandModel || '-'}</td>
-              <td>{formatToPeso(item.unitCost)}</td>
-              <td>{item.date || '-'}</td>
-              <td>{item.accountablePerson || '-'}</td>
-              <td 
-                className={getStatusClass(item.status)}
-                onClick={() => handleStatusClick(item.status, item.date, item.remarks)}
-                style={{ cursor: 'pointer' }}
-              >
-                {item.status || '-'}
-              </td>
-              <td>{item.location || '-'}</td>
-              <td>{item.user || '-'}</td>
-              <td>{item.pcName || '-'}</td>
-              <td>{item.remarks || '-'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
-  };
-
   return (
-    <div className="inventory-list-container">
-      {type === 'PRINTERS' ? renderPrintersTable() : renderComputerTable()}
-      <StatusPopup
-        status={selectedStatus?.status}
-        date={selectedStatus?.date}
-        disposalInfo={selectedStatus?.disposalInfo}
-        isOpen={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-      />
+    <div className="table-container">
+      <div className="inventory-list">
+        <table>
+          <thead>
+            <tr>
+              {headers.map(header => (
+                <th 
+                  key={header.key}
+                  onClick={() => onSort && onSort(header.key)}
+                  className={sortConfig?.field === header.key ? `sorted-${sortConfig.direction}` : ''}
+                >
+                  {header.label}
+                  {sortConfig?.field === header.key && (
+                    <span className="sort-indicator">
+                      {sortConfig.direction === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {safeItems.map((item, index) => (
+              <tr key={index}>
+                {headers.map(header => (
+                  <td key={header.key}>
+                    {header.key === 'status' ? (
+                      <span 
+                        className={`status-cell ${item[header.key]?.toLowerCase()}`}
+                        onClick={() => handleStatusClick(item[header.key], item.date)}
+                      >
+                        {item[header.key] || '-'}
+                      </span>
+                    ) : header.key.includes('Cost') || header.key.includes('Price') || header.key.includes('Amount') ? (
+                      formatToPeso(item[header.key])
+                    ) : (
+                      item[header.key] || '-'
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {isPopupOpen && selectedStatus && (
+          <StatusPopup
+            status={selectedStatus}
+            date={selectedDate}
+            isOpen={isPopupOpen}
+            onClose={() => setIsPopupOpen(false)}
+          />
+        )}
+      </div>
     </div>
   );
-}
+};
 
-export default InventoryList; 
+export default InventoryList;
