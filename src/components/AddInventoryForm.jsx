@@ -1,37 +1,25 @@
 import React, { useState } from 'react';
+import './AddInventoryForm.css';
 
 function AddInventoryForm({ onSubmit, onCancel, type }) {
   const initialState = type === 'PRINTERS' ? {
-    // Printer specific fields
-    type: '', // Printer/Scanner/Peripheral
+    type: '',
     serialNo: '',
     propertyNo: '',
     brandModel: '',
-    
-    // Common details
     unitCost: '',
     date: new Date().toISOString().split('T')[0],
-    accountablePerson: '',
     status: 'SERVICEABLE',
-    location: '',
-    user: ''
+    location: ''
   } : type === 'Laptops' ? {
-    // Laptop details
     serialNo: '',
     propertyNo: '',
     brandModel: '',
-    
-    // Common details
     unitCost: '',
     date: new Date().toISOString().split('T')[0],
-    accountablePerson: '',
     status: 'SERVICEABLE',
-    location: '',
-    user: '',
-    remarks: '',
-    pcName: ''
+    location: ''
   } : {
-    // Original computer structure
     systemUnit: {
       serialNo: '',
       propertyNo: '',
@@ -42,15 +30,10 @@ function AddInventoryForm({ onSubmit, onCancel, type }) {
       propertyNo: '',
       brandModel: '',
     },
-    // Common details
     unitCost: '',
     date: new Date().toISOString().split('T')[0],
-    accountablePerson: '',
     status: 'SERVICEABLE',
-    location: '',
-    user: '',
-    remarks: '',
-    pcName: '',
+    location: ''
   };
 
   const [formData, setFormData] = useState(initialState);
@@ -111,10 +94,8 @@ function AddInventoryForm({ onSubmit, onCancel, type }) {
     // Common validations
     if (!formData.unitCost) newErrors.unitCost = 'Required';
     if (!formData.date) newErrors.date = 'Required';
-    if (!formData.accountablePerson) newErrors.accountablePerson = 'Required';
     if (!formData.status) newErrors.status = 'Required';
     if (!formData.location) newErrors.location = 'Required';
-    if (!formData.user) newErrors.user = 'Required';
 
     return newErrors;
   };
@@ -161,73 +142,10 @@ function AddInventoryForm({ onSubmit, onCancel, type }) {
     <div className="add-inventory-form">
       <h2>Add New {type}</h2>
       <form onSubmit={handleSubmit}>
-        {type === 'PRINTERS' && (
-          <div className="form-section">
-            <h3 className="form-section-title">Printer/Peripheral Details</h3>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Device Type *</label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleChange}
-                  className={errors.type ? 'error' : ''}
-                  required
-                >
-                  <option value="">Select Type</option>
-                  <option value="Printer">Printer</option>
-                  <option value="Scanner">Scanner</option>
-                  <option value="Other Peripherals">Other Peripherals</option>
-                </select>
-                {errors.type && <span className="error-message">{errors.type}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>Serial No. *</label>
-                <input
-                  type="text"
-                  name="serialNo"
-                  value={formData.serialNo}
-                  onChange={handleChange}
-                  className={errors.serialNo ? 'error' : ''}
-                />
-                {errors.serialNo && <span className="error-message">{errors.serialNo}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>Property No. *</label>
-                <input
-                  type="text"
-                  name="propertyNo"
-                  value={formData.propertyNo}
-                  onChange={handleChange}
-                  className={errors.propertyNo ? 'error' : ''}
-                />
-                {errors.propertyNo && <span className="error-message">{errors.propertyNo}</span>}
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>Brand/Model *</label>
-                <input
-                  type="text"
-                  name="brandModel"
-                  value={formData.brandModel}
-                  onChange={handleChange}
-                  className={errors.brandModel ? 'error' : ''}
-                />
-                {errors.brandModel && <span className="error-message">{errors.brandModel}</span>}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {type === 'Computers' && (
+        {type === 'COMPUTERS' ? (
           <>
-            {/* System Unit Section */}
             <div className="form-section">
-              <h3 className="form-section-title">System Unit Details</h3>
+              <h3>System Unit</h3>
               <div className="form-row">
                 <div className="form-group">
                   <label>Serial No. *</label>
@@ -254,25 +172,24 @@ function AddInventoryForm({ onSubmit, onCancel, type }) {
                   {errors['systemUnit.propertyNo'] && 
                     <span className="error-message">{errors['systemUnit.propertyNo']}</span>}
                 </div>
+              </div>
 
-                <div className="form-group">
-                  <label>Brand/Model *</label>
-                  <input
-                    type="text"
-                    name="systemUnit.brandModel"
-                    value={formData.systemUnit.brandModel}
-                    onChange={handleChange}
-                    className={errors['systemUnit.brandModel'] ? 'error' : ''}
-                  />
-                  {errors['systemUnit.brandModel'] && 
-                    <span className="error-message">{errors['systemUnit.brandModel']}</span>}
-                </div>
+              <div className="form-group">
+                <label>Brand/Model *</label>
+                <input
+                  type="text"
+                  name="systemUnit.brandModel"
+                  value={formData.systemUnit.brandModel}
+                  onChange={handleChange}
+                  className={errors['systemUnit.brandModel'] ? 'error' : ''}
+                />
+                {errors['systemUnit.brandModel'] && 
+                  <span className="error-message">{errors['systemUnit.brandModel']}</span>}
               </div>
             </div>
 
-            {/* Monitor Section */}
             <div className="form-section">
-              <h3 className="form-section-title">Monitor Details</h3>
+              <h3>Monitor</h3>
               <div className="form-row">
                 <div className="form-group">
                   <label>Serial No. *</label>
@@ -299,194 +216,103 @@ function AddInventoryForm({ onSubmit, onCancel, type }) {
                   {errors['monitor.propertyNo'] && 
                     <span className="error-message">{errors['monitor.propertyNo']}</span>}
                 </div>
-
-                <div className="form-group">
-                  <label>Brand/Model *</label>
-                  <input
-                    type="text"
-                    name="monitor.brandModel"
-                    value={formData.monitor.brandModel}
-                    onChange={handleChange}
-                    className={errors['monitor.brandModel'] ? 'error' : ''}
-                  />
-                  {errors['monitor.brandModel'] && 
-                    <span className="error-message">{errors['monitor.brandModel']}</span>}
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
-        {type === 'Laptops' && (
-          <div className="form-section">
-            <h3 className="form-section-title">Laptop Details</h3>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Serial No. *</label>
-                <input
-                  type="text"
-                  name="serialNo"
-                  value={formData.serialNo}
-                  onChange={handleChange}
-                  className={errors.serialNo ? 'error' : ''}
-                />
-                {errors.serialNo && 
-                  <span className="error-message">{errors.serialNo}</span>}
-              </div>
-
-              <div className="form-group">
-                <label>Property No. *</label>
-                <input
-                  type="text"
-                  name="propertyNo"
-                  value={formData.propertyNo}
-                  onChange={handleChange}
-                  className={errors.propertyNo ? 'error' : ''}
-                />
-                {errors.propertyNo && 
-                  <span className="error-message">{errors.propertyNo}</span>}
               </div>
 
               <div className="form-group">
                 <label>Brand/Model *</label>
                 <input
                   type="text"
-                  name="brandModel"
-                  value={formData.brandModel}
+                  name="monitor.brandModel"
+                  value={formData.monitor.brandModel}
                   onChange={handleChange}
-                  className={errors.brandModel ? 'error' : ''}
+                  className={errors['monitor.brandModel'] ? 'error' : ''}
                 />
-                {errors.brandModel && 
-                  <span className="error-message">{errors.brandModel}</span>}
+                {errors['monitor.brandModel'] && 
+                  <span className="error-message">{errors['monitor.brandModel']}</span>}
               </div>
+            </div>
+          </>
+        ) : (
+          <div className="form-row">
+            <div className="form-group">
+              <label>Serial No. *</label>
+              <input
+                type="text"
+                name="serialNo"
+                value={formData.serialNo}
+                onChange={handleChange}
+                className={errors.serialNo ? 'error' : ''}
+              />
+              {errors.serialNo && <span className="error-message">{errors.serialNo}</span>}
+            </div>
+
+            <div className="form-group">
+              <label>Property No. *</label>
+              <input
+                type="text"
+                name="propertyNo"
+                value={formData.propertyNo}
+                onChange={handleChange}
+                className={errors.propertyNo ? 'error' : ''}
+              />
+              {errors.propertyNo && <span className="error-message">{errors.propertyNo}</span>}
+            </div>
+
+            <div className="form-group">
+              <label>Brand/Model *</label>
+              <input
+                type="text"
+                name="brandModel"
+                value={formData.brandModel}
+                onChange={handleChange}
+                className={errors.brandModel ? 'error' : ''}
+              />
+              {errors.brandModel && <span className="error-message">{errors.brandModel}</span>}
             </div>
           </div>
         )}
 
-        {/* Common Details Section */}
-        <div className="form-section">
-          <h3 className="form-section-title">Common Details</h3>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Unit Cost *</label>
-              <div className="peso-input-wrapper">
-                <span className="peso-symbol">₱</span>
-                <input
-                  type="number"
-                  name="unitCost"
-                  value={formData.unitCost}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.01"
-                  className={errors.unitCost ? 'error' : ''}
-                  placeholder="0.00"
-                />
-              </div>
-              {errors.unitCost && <span className="error-message">{errors.unitCost}</span>}
-            </div>
-
-            <div className="form-group">
-              <label>Date *</label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleChange}
-                className={errors.date ? 'error' : ''}
-              />
-              {errors.date && <span className="error-message">{errors.date}</span>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="status">Status</label>
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleStatusChange}
-                required
-              >
-                <option value="SERVICEABLE">SERVICEABLE</option>
-                <option value="UNSERVICEABLE">UNSERVICEABLE</option>
-              </select>
-            </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Unit Cost *</label>
+            <input
+              type="number"
+              name="unitCost"
+              value={formData.unitCost}
+              onChange={handleChange}
+              className={errors.unitCost ? 'error' : ''}
+            />
+            {errors.unitCost && <span className="error-message">{errors.unitCost}</span>}
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Accountable Person *</label>
-              <input
-                type="text"
-                name="accountablePerson"
-                value={formData.accountablePerson}
-                onChange={handleChange}
-                className={errors.accountablePerson ? 'error' : ''}
-              />
-              {errors.accountablePerson && 
-                <span className="error-message">{errors.accountablePerson}</span>}
-            </div>
-
-            <div className="form-group">
-              <label>Location *</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                className={errors.location ? 'error' : ''}
-              />
-              {errors.location && <span className="error-message">{errors.location}</span>}
-            </div>
-
-            <div className="form-group">
-              <label>User *</label>
-              <input
-                type="text"
-                name="user"
-                value={formData.user}
-                onChange={handleChange}
-                className={errors.user ? 'error' : ''}
-              />
-              {errors.user && <span className="error-message">{errors.user}</span>}
-            </div>
+          <div className="form-group">
+            <label>Date *</label>
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              className={errors.date ? 'error' : ''}
+            />
+            {errors.date && <span className="error-message">{errors.date}</span>}
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>PC Name *</label>
-              <input
-                type="text"
-                name="pcName"
-                value={formData.pcName}
-                onChange={handleChange}
-                className={errors.pcName ? 'error' : ''}
-              />
-              {errors.pcName && <span className="error-message">{errors.pcName}</span>}
-            </div>
-
-            <div className="form-group">
-              <label>Remarks</label>
-              <textarea
-                name="remarks"
-                value={formData.remarks}
-                onChange={handleChange}
-                rows="3"
-              />
-            </div>
+          <div className="form-group">
+            <label>Location *</label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              className={errors.location ? 'error' : ''}
+            />
+            {errors.location && <span className="error-message">{errors.location}</span>}
           </div>
         </div>
 
         <div className="form-actions">
-          <button type="submit" className="btn btn-primary">
-            Add Item
-          </button>
-          <button 
-            type="button" 
-            className="btn btn-secondary"
-            onClick={onCancel}
-          >
-            Cancel
-          </button>
+          <button type="submit" className="btn-submit">Add {type}</button>
+          <button type="button" className="btn-cancel" onClick={onCancel}>Cancel</button>
         </div>
       </form>
     </div>

@@ -1,6 +1,7 @@
 import './InventoryList.css';
 import React, { useState } from 'react';
 import StatusPopup from './StatusPopup';
+import ItemDetailsPopup from './ItemDetailsPopup';
 
 const SUPPLIES_HEADERS = [
   { key: 'itemSpecifications', label: 'Item & Specifications' },
@@ -70,10 +71,12 @@ const PRINTER_HEADERS = [
   { key: 'remarks', label: 'REMARKS' }
 ];
 
-const InventoryList = ({ items, onSort, sortConfig, type }) => {
+const InventoryList = ({ items, onSort, sortConfig, type, onUpdateItem }) => {
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [showDetailsPopup, setShowDetailsPopup] = useState(false);
 
   const safeItems = Array.isArray(items) ? items : [];
   
@@ -113,6 +116,16 @@ const InventoryList = ({ items, onSort, sortConfig, type }) => {
     setIsPopupOpen(true);
   };
 
+  const handleRowClick = (item) => {
+    setSelectedItem(item);
+    setShowDetailsPopup(true);
+  };
+
+  const handleSaveDetails = (details) => {
+    onUpdateItem({ ...selectedItem, ...details });
+    setShowDetailsPopup(false);
+  };
+
   return (
     <div className="table-container">
       <div className="inventory-list">
@@ -137,13 +150,13 @@ const InventoryList = ({ items, onSort, sortConfig, type }) => {
           </thead>
           <tbody>
             {safeItems.map((item, index) => (
-              <tr key={index}>
+              <tr key={index} onClick={() => handleRowClick(item)} style={{ cursor: 'pointer' }}>
                 {headers.map(header => (
                   <td key={header.key}>
                     {header.key === 'status' ? (
                       <span 
                         className={`status-cell ${item[header.key]?.toLowerCase()}`}
-                        onClick={() => handleStatusClick(item[header.key], item.date)}
+                        onClick={(e) => { e.stopPropagation(); handleStatusClick(item[header.key], item.date); }}
                       >
                         {item[header.key] || '-'}
                       </span>
@@ -165,6 +178,14 @@ const InventoryList = ({ items, onSort, sortConfig, type }) => {
             date={selectedDate}
             isOpen={isPopupOpen}
             onClose={() => setIsPopupOpen(false)}
+          />
+        )}
+
+        {showDetailsPopup && selectedItem && (
+          <ItemDetailsPopup
+            item={selectedItem}
+            onSave={handleSaveDetails}
+            onClose={() => setShowDetailsPopup(false)}
           />
         )}
       </div>
