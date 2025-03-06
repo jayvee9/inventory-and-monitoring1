@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { sheetService } from '../services/sheetService';
 import RequestSupplyForm from './RequestSupplyForm';
+import OfficeSuppliesSubCategory from './OfficeSuppliesSubCategory';
 import './OfficeSuppliesPage.css';
 
 function OfficeSuppliesPage() {
@@ -194,6 +195,10 @@ function OfficeSuppliesPage() {
         </div>
       )}
 
+      {/* Sub-category table */}
+      <OfficeSuppliesSubCategory items={supplies} />
+
+      {/* Existing supplies table */}
       <div className="inventory-list-container">
         {renderSuppliesTable()}
       </div>
