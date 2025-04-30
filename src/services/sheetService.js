@@ -1,3 +1,5 @@
+import { supabase } from '../config/supabaseClient';
+
 // API Configuration
 const API_CONFIG = {
   BASE_URL: 'https://api.sheetbest.com/sheets/0193b11b-d499-4c08-a3a2-d562a388086c',
@@ -107,66 +109,30 @@ export const sheetService = {
     }
   },
 
-  getAllItems: async (type = 'SUPPLIES', forceFresh = false) => {
+  getAllItems: async (type = 'COMPUTERS') => {
     try {
-      const url = `${getAuthenticatedUrl(type)}?_t=${Date.now()}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const tableName = type === 'PRINTERS' ? 'printers_peripherals' : type.toLowerCase();
       
-      const data = await response.json();
-      
-      // Map the data based on type
-      const processedData = data.map((item, index) => {
-        if (type === 'SUPPLIES') {
-          return {
-            itemSpecifications: item['Item & Specifications'] || '',
-            unitOfMeasure: item['Unit of Measure'] || '',
-            beginningBalance: parseFloat(item['Beginning Balance as of 02/01/2025']) || 0,
-            purchasesForMonth: parseFloat(item['Purchases for the Month']) || 0,
-            totalBalance: parseFloat(item['Total Balance']) || 0,
-            adjustment: parseFloat(item['ADJUSTMENT']) || 0,
-            examination: parseFloat(item['EXAMINATION']) || 0,
-            lrd: parseFloat(item['LRD']) || 0,
-            application: parseFloat(item['APPLICATION']) || 0,
-            regulation: parseFloat(item['REGULATION']) || 0,
-            registration: parseFloat(item['REGISTRATION']) || 0,
-            admin: parseFloat(item['ADMIN']) || 0,
-            ord: parseFloat(item['ORD']) || 0,
-            valencia: parseFloat(item['VALENCIA']) || 0,
-            iligan: parseFloat(item['ILIGAN']) || 0,
-            totalReleases: parseFloat(item['Total Releases']) || 0,
-            endingBalance: parseFloat(item['Ending Balance as of 02/28/2025']) || 0,
-            unitCost: parseFloat(item['UNIT COST']) || 0,
-            totalAmount: parseFloat(item['TOTAL AMOUNT']) || 0,
-            psPriceDBM: parseFloat(item['PS/DBM PRICE']) || 0,
-            outsidePSPrice: parseFloat(item['OUTSIDE PS PRICE']) || 0,
-            _rowIndex: index + 0
-          };
-        } else {
-          // Keep existing mapping for computers, laptops, and printers
-          return {
-            serialNo: item['Serial No.'],
-            propertyNo: item['Property No.'],
-            brandModel: item['Brand/Model'],
-            monitorSerialNo: item['Monitor Serial No.'],
-            monitorPropertyNo: item['Monitor Property No.'],
-            monitorBrandModel: item['Monitor Brand/Model'],
-            unitCost: item['UNIT COST'],
-            date: item['DATE'],
-            accountablePerson: item['ACCT. PERSON'],
-            status: item['STATUS  (SERVICEABLE/ UNSERVICEABLE)'],
-            location: item['LOCATION'],
-            user: item['USER'],
-            pcName: item['PCNAME'],
-            remarks: item['REMARKS'],
-            _rowIndex: index + 0
-          };
-        }
-      });
+      let { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      return processedData;
+      if (error) throw error;
+
+      return data.map((item) => ({
+        serialNo: item.serial_no,
+        propertyNo: item.property_no,
+        brandModel: item.brand_model,
+        unitCost: item.unit_cost,
+        date: item.date,
+        accountablePerson: item.accountable_person,
+        status: item.status || 'SERVICEABLE',
+        location: item.location,
+        id: item.id
+      }));
     } catch (error) {
-      console.error('Error in getAllItems:', error);
+      console.error('Error fetching items:', error);
       return [];
     }
   },
@@ -309,95 +275,26 @@ export const sheetService = {
 
   addItem: async (item, type) => {
     try {
-      const url = getAuthenticatedUrl(type);
-      let formattedItem;
+      const tableName = type === 'PRINTERS' ? 'printers_peripherals' : type.toLowerCase();
       
-      // Normalize type to uppercase for consistent comparison
-      const normalizedType = type.toUpperCase();
+      const formattedItem = {
+        serial_no: item.serialNo,
+        property_no: item.propertyNo,
+        brand_model: item.brandModel,
+        unit_cost: item.unitCost,
+        date: item.date,
+        accountable_person: item.accountablePerson,
+        status: 'SERVICEABLE',
+        location: item.location
+      };
 
-      switch (normalizedType) {
-        case 'SUPPLIES':
-          formattedItem = {
-            'Item & Specifications': item.itemSpecifications,
-            'Unit of Measure': item.unitOfMeasure,
-            'Beginning Balance as of 02/01/2025': item.beginningBalance,
-            'Purchases for the Month': item.purchasesForMonth,
-            'Total Balance': item.totalBalance,
-            'Adjustment': item.adjustment,
-            'Examination': item.examination,
-            'LRD': item.lrd,
-            'Application': item.application,
-            'Regulation': item.regulation,
-            'Registration': item.registration,
-            'Admin': item.admin,
-            'ORD': item.ord,
-            'Valencia': item.valencia,
-            'Iligan': item.iligan,
-            'Total Releases': item.totalReleases,
-            'Ending Balance as of 02/28/2025': item.endingBalance,
-            'Unit Cost': item.unitCost,
-            'Total Amount': item.totalAmount,
-            'PS/DBM Price': item.psPriceDBM,
-            'Outside PS Price': item.outsidePSPrice
-          };
-          break;
+      const { data, error } = await supabase
+        .from(tableName)
+        .insert([formattedItem])
+        .select();
 
-        case 'PRINTERS':
-          formattedItem = {
-            'Type': item.type,
-            'Serial No.': item.serialNo,
-            'Property No.': item.propertyNo,
-            'Brand/Model': item.brandModel,
-            'UNIT COST': item.unitCost,
-            'DATE': item.date,
-            'ACCT. PERSON': item.accountablePerson,
-            'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status,
-            'LOCATION': item.location,
-            'USER': item.user
-          };
-          break;
-
-        case 'COMPUTERS':
-        case 'LAPTOPS':
-          formattedItem = {
-            'Serial No.': item.serialNo || item.systemUnit?.serialNo,
-            'Property No.': item.propertyNo || item.systemUnit?.propertyNo,
-            'Brand/Model': item.brandModel || item.systemUnit?.brandModel,
-            'Monitor Serial No.': item.monitorSerialNo || item.monitor?.serialNo,
-            'Monitor Property No.': item.monitorPropertyNo || item.monitor?.propertyNo,
-            'Monitor Brand/Model': item.monitorBrandModel || item.monitor?.brandModel,
-            'UNIT COST': item.unitCost,
-            'DATE': item.date,
-            'ACCT. PERSON': item.accountablePerson,
-            'STATUS  (SERVICEABLE/ UNSERVICEABLE)': item.status,
-            'LOCATION': item.location,
-            'USER': item.user,
-            'PCNAME': item.pcName,
-            'REMARKS': item.remarks
-          };
-          break;
-
-        default:
-          throw new Error(`Unknown type: ${type}. Expected COMPUTERS, LAPTOPS, PRINTERS, or SUPPLIES`);
-      }
-
-      console.log('Sending formatted item:', formattedItem);
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(formattedItem)
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-      }
-
-      return true;
+      if (error) throw error;
+      return data[0];
     } catch (error) {
       console.error('Error adding item:', error);
       throw error;
@@ -451,44 +348,33 @@ export const sheetService = {
     }
   },
 
-  updateItem: async (itemId, updatedData) => {
+  updateItem: async (item, type) => {
     try {
-      const url = getAuthenticatedUrl(`/${itemId}`);
-      
-      const response = await fetch(url, {
-        method: 'PUT',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': 'http://localhost:3000'
-        },
-        body: JSON.stringify(updatedData)
-      });
+      const { data, error } = await supabase
+        .from(type.toLowerCase())
+        .update(item)
+        .eq('id', item.id)
+        .select();
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Update failed: ${response.status} - ${errorText}`);
-      }
+      if (error) throw error;
 
-      return await response.json();
+      return data[0];
     } catch (error) {
       console.error('Error updating item:', error);
       throw error;
     }
   },
 
-  deleteItem: async (rowId) => {
+  deleteItem: async (id, type) => {
     try {
-      const response = await fetch(getAuthenticatedUrl(`/${rowId}`), {
-        method: 'DELETE'
-      });
+      const { error } = await supabase
+        .from(type.toLowerCase())
+        .delete()
+        .eq('id', id);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (error) throw error;
 
-      return await response.json();
+      return true;
     } catch (error) {
       console.error('Error deleting item:', error);
       throw error;
@@ -544,6 +430,26 @@ export const sheetService = {
         return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
       }
     });
+  },
+
+  updateItemStatus: async (item, type) => {
+    try {
+      const { data, error } = await supabase
+        .from(type.toLowerCase())
+        .update({
+          maintenance_date: item.maintenanceDate,
+          disposal_date: item.disposalDate,
+          disposal_location: item.disposalLocation
+        })
+        .eq('id', item.id)
+        .select();
+
+      if (error) throw error;
+      return data[0];
+    } catch (error) {
+      console.error('Error updating status:', error);
+      throw error;
+    }
   }
 };
 // Export the valid status values for use in components

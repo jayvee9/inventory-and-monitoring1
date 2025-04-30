@@ -1,62 +1,66 @@
-import React, { useState } from 'react';
-import InventoryPage from './InventoryPage';
-import printerIcon from '../assets/icons/printer.png';
-import scannerIcon from '../assets/icons/scanner.png';
-import peripheralIcon from '../assets/icons/peripheral.png';
+import React, { useState, useEffect, useCallback } from 'react';
+import InventoryList from './InventoryList';
+import AddInventoryForm from './AddInventoryForm';
+import { sheetService } from '../services/sheetService';
 import './PrintersPeripheralsPage.css';
 
-function PrintersPeripheralsPage() {
-  const [selectedType, setSelectedType] = useState('all');
+const PrintersPeripheralsPage = () => {
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [sortConfig, setSortConfig] = useState(null);
 
-  const printerColumns = {
-    DEVICE: {
-      TYPE: 'Type',
-      SERIAL_NO: 'Serial No.',
-      PROPERTY_NO: 'Property No.',
-      BRAND_MODEL: 'Brand/Model'
-    },
-    COMMON: {
-      UNIT_COST: 'UNIT COST',
-      DATE: 'DATE',
-      ACCT_PERSON: 'ACCT. PERSON',
-      STATUS: 'STATUS  (SERVICEABLE/ UNSERVICEABLE)',
-      LOCATION: 'LOCATION',
-      USER: 'USER'
+  const fetchItems = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await sheetService.getAllItems('PRINTERS');
+      setItems(data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch items');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
+
+  const handleSort = (field) => {
+    let direction = 'asc';
+    if (sortConfig?.field === field && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ field, direction });
+  };
+
+  const handleAddItem = async (newItem) => {
+    try {
+      await sheetService.addItem(newItem, 'PRINTERS');
+      await fetchItems();
+    } catch (error) {
+      console.error('Error adding item:', error);
+      setError('Failed to add item');
     }
   };
 
-  const deviceTypes = [
-    { id: 'printer', name: 'Printer', icon: printerIcon },
-    { id: 'scanner', name: 'Scanner', icon: scannerIcon },
-    { id: 'peripheral', name: 'Other Peripherals', icon: peripheralIcon }
-  ];
-
-  const handleTypeSelect = (typeId) => {
-    setSelectedType(typeId);
-  };
+  if (error) return <div className="error-message">{error}</div>;
+  if (isLoading) return <div className="loading">Loading...</div>;
 
   return (
     <div className="printers-peripherals-page">
-      <div className="device-type-grid">
-        {deviceTypes.map(type => (
-          <div 
-            key={type.id} 
-            className={`device-type-card ${selectedType === type.id ? 'active' : ''}`}
-            onClick={() => handleTypeSelect(type.id)}
-          >
-            <img src={type.icon} alt={type.name} className="device-icon" />
-            <span>{type.name}</span>
-          </div>
-        ))}
-      </div>
-      <InventoryPage 
+      <h2>Printers & Peripherals Inventory</h2>
+      <AddInventoryForm onSubmit={handleAddItem} type="PRINTERS" />
+      <InventoryList 
+        items={items} 
+        onSort={handleSort}
+        sortConfig={sortConfig}
         type="PRINTERS"
-        columns={printerColumns}
-        className="printers-inventory"
-        filterType={selectedType !== 'all' ? selectedType : null}
       />
     </div>
   );
-}
+};
 
 export default PrintersPeripheralsPage; 

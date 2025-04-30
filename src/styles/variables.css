@@ -1,0 +1,36 @@
+/* Create a global variables file */
+:root {
+  /* Colors */
+  --primary-color: #1e40af;
+  --primary-dark: #1d4ed8;
+  --secondary-color: #2563eb;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --border-color: #e2e8f0;
+  --background-light: #f8fafc;
+  --success-color: #15803d;
+  --error-color: #dc2626;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+} 

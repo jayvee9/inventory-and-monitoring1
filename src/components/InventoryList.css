@@ -66,31 +66,24 @@
 
 /* Status Cell Styles */
 .status-cell {
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  display: inline-block;
-  min-width: 140px;
-  text-align: center;
+  padding: 4px 8px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s;
 }
 
 .status-cell.serviceable {
-  background-color: #dcfce7;
-  color: #15803d;
-  border: 1px solid #86efac;
+  background-color: #e8f5e9;
+  color: #2e7d32;
 }
 
 .status-cell.unserviceable {
-  background-color: #fee2e2;
-  color: #b91c1c;
-  border: 1px solid #fca5a5;
+  background-color: #ffebee;
+  color: #c62828;
 }
 
 .status-cell:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  opacity: 0.8;
 }
 
 /* Sort Indicator */

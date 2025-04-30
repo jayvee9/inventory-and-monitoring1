@@ -1,0 +1,55 @@
+/* Shared table styles */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin: var(--spacing-lg) 0;
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1200px;
+  font-family: var(--font-family);
+}
+
+.table-header {
+  background: linear-gradient(to bottom, var(--primary-color), var(--primary-dark));
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--spacing-md);
+}
+
+.table th {
+  background: var(--background-light);
+  padding: var(--spacing-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table td {
+  padding: var(--spacing-md);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Example of documented styles */
+/**
+ * Table Component
+ * Used across all inventory tables
+ * @example
+ * <div class="table-container">
+ *   <table class="table">...</table>
+ * </div>
+ */ 
+
+/* Consistent breakpoints */
+@media (max-width: 1280px) { /* Desktop */ }
+@media (max-width: 1024px) { /* Tablet Landscape */ }
+@media (max-width: 768px) { /* Tablet Portrait */ }
+@media (max-width: 480px) { /* Mobile */ } 

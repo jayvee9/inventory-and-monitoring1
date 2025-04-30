@@ -2,136 +2,64 @@ import React, { useState, useEffect, useCallback } from 'react';
 import InventoryList from './InventoryList';
 import AddInventoryForm from './AddInventoryForm';
 import { sheetService } from '../services/sheetService';
+import './InventoryPage.css';
 
-function InventoryPage({ type }) {
-  const [inventoryItems, setInventoryItems] = useState([]);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [loading, setLoading] = useState(true);
+const InventoryPage = ({ type }) => {
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({});
-  const [sortConfig, setSortConfig] = useState({ field: null, direction: 'asc' });
-  const [submitStatus, setSubmitStatus] = useState({ show: false, message: '', type: '' });
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [sortConfig, setSortConfig] = useState(null);
 
   const fetchItems = useCallback(async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       const data = await sheetService.getAllItems(type);
-      setInventoryItems(data);
+      setItems(data);
       setError(null);
     } catch (err) {
-      console.error('Error fetching inventory:', err);
-      setError('Failed to load inventory data');
+      setError('Failed to fetch items');
+      console.error(err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   }, [type]);
 
   useEffect(() => {
     fetchItems();
-  }, [fetchItems, refreshTrigger]);
+  }, [fetchItems]);
 
   const handleSort = (field) => {
-    setSortConfig(prevSort => ({
-      field,
-      direction: prevSort.field === field && prevSort.direction === 'asc' ? 'desc' : 'asc'
-    }));
+    let direction = 'asc';
+    if (sortConfig?.field === field && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ field, direction });
   };
 
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleFilter = (filterName, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterName]: value
-    }));
-  };
-
-  const addInventoryItem = async (newItem) => {
+  const handleAddItem = async (newItem) => {
     try {
-      setLoading(true);
-      console.log('Adding new item:', newItem);
-      
       await sheetService.addItem(newItem, type);
-      
-      setSubmitStatus({
-        show: true,
-        message: `${type} item added successfully!`,
-        type: 'success'
-      });
-      
-      setShowAddForm(false);
-      setRefreshTrigger(prev => prev + 1);
-      
+      await fetchItems();
     } catch (error) {
       console.error('Error adding item:', error);
-      setSubmitStatus({
-        show: true,
-        message: `Failed to add ${type} item: ${error.message}`,
-        type: 'error'
-      });
-    } finally {
-      setLoading(false);
+      setError('Failed to add item');
     }
   };
 
+  if (error) return <div className="error-message">{error}</div>;
+  if (isLoading) return <div className="loading">Loading...</div>;
+
   return (
-    <div className="container">
-      <h1>{type} Inventory</h1>
-      
-      {loading && (
-        <div className="loading-spinner">Loading...</div>
-      )}
-      
-      {error && (
-        <div className="error-alert">
-          {error}
-          <button onClick={() => setError(null)}>✕</button>
-        </div>
-      )}
-
-      {submitStatus.show && (
-        <div className={`status-alert ${submitStatus.type}`}>
-          {submitStatus.message}
-          <button onClick={() => setSubmitStatus({ show: false, message: '', type: '' })}>✕</button>
-        </div>
-      )}
-
-      <div className="actions">
-        <button 
-          className="btn btn-primary"
-          onClick={() => setShowAddForm(true)}
-          disabled={loading}
-        >
-          Add New {type}
-        </button>
-      </div>
-
-      {showAddForm && (
-        <AddInventoryForm
-          type={type}
-          onSubmit={addInventoryItem}
-          onCancel={() => setShowAddForm(false)}
-        />
-      )}
-
-      {!loading && (
-        <InventoryList
-          items={inventoryItems}
-          type={type}
-          onSort={handleSort}
-          sortConfig={sortConfig}
-          searchTerm={searchTerm}
-          onSearch={handleSearch}
-          filters={filters}
-          onFilter={handleFilter}
-        />
-      )}
+    <div className="inventory-page">
+      <AddInventoryForm onSubmit={handleAddItem} type={type} />
+      <InventoryList 
+        items={items} 
+        onSort={handleSort}
+        sortConfig={sortConfig}
+        type={type}
+      />
     </div>
   );
-}
+};
 
 export default InventoryPage;
