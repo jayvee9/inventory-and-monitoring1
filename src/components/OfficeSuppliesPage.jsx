@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { sheetService } from '../services/sheetService';
+import { createClient } from '@supabase/supabase-js';
 import RequestSupplyForm from './RequestSupplyForm';
 import OfficeSuppliesSubCategory from './OfficeSuppliesSubCategory';
 import './OfficeSuppliesPage.css';
+
+// Initialize Supabase client
+const supabaseUrl = 'https://xhmomrolqwicnzayewky.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobW9tcm9scXdpY256YXlld2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMwNTQ2NDksImV4cCI6MjA1ODYzMDY0OX0.52keJ2RWDgjKLxHwbq272NsWqNPohHhTxOpi4zqkJbY';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 function OfficeSuppliesPage() {
   const [supplies, setSupplies] = useState([]);
@@ -14,8 +19,14 @@ function OfficeSuppliesPage() {
   const fetchSupplies = async () => {
     try {
       setLoading(true);
-      const data = await sheetService.getAllItems('SUPPLIES');
-      setSupplies(data);
+      const { data, error } = await supabase
+        .from('officesuppliesinventory')
+        .select('*')
+        .order('item_specifications', { ascending: true });
+
+      if (error) throw error;
+      
+      setSupplies(data || []);
       setError(null);
     } catch (err) {
       console.error('Error fetching supplies:', err);
@@ -29,44 +40,47 @@ function OfficeSuppliesPage() {
     try {
       setLoading(true);
       
-      // Format the data to match the new sheet column names
+      // Format the data to match Supabase table columns
       const formattedData = {
-        'Item & Specifications': requestData.itemSpecifications,
-        'Unit of Measure': requestData.unitOfMeasure,
-        'Beginning Balance as of 02/01/2025': requestData.beginningBalance,
-        'Purchases for the Month': requestData.purchasesForMonth,
-        'Total Balance': requestData.totalBalance,
-        'Adjustment': requestData.adjustment,
-        'Examination': requestData.examination,
-        'LRD': requestData.lrd,
-        'Application': requestData.application,
-        'Regulation': requestData.regulation,
-        'Registration': requestData.registration,
-        'Admin': requestData.admin,
-        'ORD': requestData.ord,
-        'Valencia': requestData.valencia,
-        'Iligan': requestData.iligan,
-        'Total Releases': requestData.totalReleases,
-        'Ending Balance as of 02/28/2025': requestData.endingBalance,
-        'Unit Cost': requestData.unitCost,
-        'Total Amount': requestData.totalAmount,
-        'PS/DBM Price': requestData.psPriceDBM,
-        'Outside PS Price': requestData.outsidePSPrice
+        item_specifications: requestData.itemSpecifications,
+        unit_of_measure: requestData.unitOfMeasure,
+        beginning_balance_20260201: requestData.beginningBalance,
+        purchases_for_month: requestData.purchasesForMonth,
+        total_balance: requestData.totalBalance,
+        adjustment: requestData.adjustment,
+        examination: requestData.examination,
+        lrd: requestData.lrd,
+        application: requestData.application,
+        regulation: requestData.regulation,
+        registration: requestData.registration,
+        admin: requestData.admin,
+        ord: requestData.ord,
+        valencia: requestData.valencia,
+        iligan: requestData.iligan,
+        total_releases: requestData.totalReleases,
+        ending_balance_20260228: requestData.endingBalance,
+        unit_cost: requestData.unitCost,
+        total_amount: requestData.totalAmount,
+        ps_dbm_price: requestData.psPriceDBM,
+        outside_ps_price: requestData.outsidePSPrice
       };
       
-      const response = await sheetService.addItem(formattedData, 'SUPPLIES');
+      const { data, error } = await supabase
+        .from('officesuppliesinventory')
+        .insert([formattedData])
+        .select();
       
-      if (response) {
-        setShowRequestForm(false);
-        setStatusMessage({
-          show: true,
-          type: 'success',
-          message: 'Supply item added successfully!'
-        });
-        
-        // Refresh the supplies list
-        await fetchSupplies();
-      }
+      if (error) throw error;
+      
+      setShowRequestForm(false);
+      setStatusMessage({
+        show: true,
+        type: 'success',
+        message: 'Supply item added successfully!'
+      });
+      
+      // Refresh the supplies list
+      await fetchSupplies();
     } catch (err) {
       console.error('Error adding supply item:', err);
       setStatusMessage({
@@ -102,7 +116,7 @@ function OfficeSuppliesPage() {
             <tr>
               <th>Item & Specifications</th>
               <th>Unit of Measure</th>
-              <th>Beginning Balance as of 02/01/2025</th>
+              <th>Beginning Balance (02/01/2026)</th>
               <th>Purchases for the Month</th>
               <th>Total Balance</th>
               <th>Adjustment</th>
@@ -116,7 +130,7 @@ function OfficeSuppliesPage() {
               <th>Valencia</th>
               <th>Iligan</th>
               <th>Total Releases</th>
-              <th>Ending Balance as of 02/28/2025</th>
+              <th>Ending Balance (02/28/2026)</th>
               <th>Unit Cost</th>
               <th>Total Amount</th>
               <th>PS/DBM Price</th>
@@ -126,11 +140,11 @@ function OfficeSuppliesPage() {
           <tbody>
             {supplies.map((item, index) => (
               <tr key={index}>
-                <td>{item.itemSpecifications || '-'}</td>
-                <td>{item.unitOfMeasure || '-'}</td>
-                <td>{item.beginningBalance || '-'}</td>
-                <td>{item.purchasesForMonth || '-'}</td>
-                <td>{item.totalBalance || '-'}</td>
+                <td>{item.item_specifications || '-'}</td>
+                <td>{item.unit_of_measure || '-'}</td>
+                <td>{item.beginning_balance_20260201 || '-'}</td>
+                <td>{item.purchases_for_month || '-'}</td>
+                <td>{item.total_balance || '-'}</td>
                 <td>{item.adjustment || '-'}</td>
                 <td>{item.examination || '-'}</td>
                 <td>{item.lrd || '-'}</td>
@@ -141,12 +155,12 @@ function OfficeSuppliesPage() {
                 <td>{item.ord || '-'}</td>
                 <td>{item.valencia || '-'}</td>
                 <td>{item.iligan || '-'}</td>
-                <td>{item.totalReleases || '-'}</td>
-                <td>{item.endingBalance || '-'}</td>
-                <td>{item.unitCost || '-'}</td>
-                <td>{item.totalAmount || '-'}</td>
-                <td>{item.psPriceDBM || '-'}</td>
-                <td>{item.outsidePSPrice || '-'}</td>
+                <td>{item.total_releases || '-'}</td>
+                <td>{item.ending_balance_20260228 || '-'}</td>
+                <td>{item.unit_cost ? `₱${item.unit_cost.toFixed(2)}` : '-'}</td>
+                <td>{item.total_amount ? `₱${item.total_amount.toFixed(2)}` : '-'}</td>
+                <td>{item.ps_dbm_price ? `₱${item.ps_dbm_price.toFixed(2)}` : '-'}</td>
+                <td>{item.outside_ps_price ? `₱${item.outside_ps_price.toFixed(2)}` : '-'}</td>
               </tr>
             ))}
           </tbody>
@@ -162,8 +176,9 @@ function OfficeSuppliesPage() {
         <button 
           className="btn btn-primary"
           onClick={() => setShowRequestForm(true)}
+          disabled={loading}
         >
-          + Add New Item
+          {loading ? 'Loading...' : '+ Add New Item'}
         </button>
       </div>
 
@@ -173,6 +188,7 @@ function OfficeSuppliesPage() {
             <RequestSupplyForm 
               onSubmit={handleRequestSubmit}
               onCancel={() => setShowRequestForm(false)}
+              loading={loading}
             />
           </div>
         </div>
@@ -195,10 +211,10 @@ function OfficeSuppliesPage() {
         </div>
       )}
 
-      {/* Sub-category table */}
+      {/* Sub-category table - pass the supplies data */}
       <OfficeSuppliesSubCategory items={supplies} />
 
-      {/* Existing supplies table */}
+      {/* Main supplies table */}
       <div className="inventory-list-container">
         {renderSuppliesTable()}
       </div>
@@ -206,4 +222,4 @@ function OfficeSuppliesPage() {
   );
 }
 
-export default OfficeSuppliesPage; 
+export default OfficeSuppliesPage;

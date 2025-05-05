@@ -1,5 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import './OfficeSuppliesSubCategory.css';
+
+const supabaseUrl = 'https://xhmomrolqwicnzayewky.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobW9tcm9scXdpY256YXlld2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMwNTQ2NDksImV4cCI6MjA1ODYzMDY0OX0.52keJ2RWDgjKLxHwbq272NsWqNPohHhTxOpi4zqkJbY';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const SUB_CATEGORY_HEADERS = [
   { key: 'article', label: 'ARTICLE' },
@@ -23,7 +28,47 @@ const SUB_CATEGORY_HEADERS = [
   { key: 'accountablePerson', label: 'ACCT. PERSON' }
 ];
 
-function OfficeSuppliesSubCategory({ items }) {
+function OfficeSuppliesSubCategory() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.from('semi_expandable_properties').select('*');
+      if (error) {
+        setError('Failed to fetch data');
+        setItems([]);
+      } else {
+        const mapped = data.map(row => ({
+          article: row.article,
+          cpuModel: row.cpu_model,
+          cpuSerialNo: row.cpu_serial_no,
+          monitorSerialNo: row.monitor_serial_no,
+          propertyNo: row.property_no,
+          unitOfMeasure: row.unit_of_measure,
+          date: row.date,
+          unitValue: row.unit_value,
+          quantityPerPropertyCard: row.quantity_per_property_card,
+          quantityPerPhysicalCount: row.quantity_per_physical_count,
+          shortageOverageQuantity: row.shortage_overage_quantity,
+          shortageOverageValue: row.shortage_overage_value,
+          status: row.status,
+          location: row.location,
+          accountablePerson: row.acct_person
+        }));
+        setItems(mapped);
+        setError(null);
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+
   return (
     <div className="sub-category-table-container">
       <div className="main-header">

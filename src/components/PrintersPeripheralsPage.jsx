@@ -1,66 +1,75 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import InventoryList from './InventoryList';
-import AddInventoryForm from './AddInventoryForm';
-import { sheetService } from '../services/sheetService';
+import React, { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import './PrintersPeripheralsPage.css';
+const supabaseUrl = 'https://xhmomrolqwicnzayewky.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobW9tcm9scXdpY256YXlld2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMwNTQ2NDksImV4cCI6MjA1ODYzMDY0OX0.52keJ2RWDgjKLxHwbq272NsWqNPohHhTxOpi4zqkJbY';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-const PrintersPeripheralsPage = () => {
+function PrintersPeripheralsPage() {
   const [items, setItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sortConfig, setSortConfig] = useState(null);
-
-  const fetchItems = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const data = await sheetService.getAllItems('PRINTERS');
-      setItems(data);
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch items');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+    const fetchData = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.from('printers_peripherals').select('*');
+      if (error) {
+        setError('Failed to fetch data');
+        setItems([]);
+      } else {
+        setItems(data);
+        setError(null);
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
 
-  const handleSort = (field) => {
-    let direction = 'asc';
-    if (sortConfig?.field === field && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ field, direction });
-  };
-
-  const handleAddItem = async (newItem) => {
-    try {
-      await sheetService.addItem(newItem, 'PRINTERS');
-      await fetchItems();
-    } catch (error) {
-      console.error('Error adding item:', error);
-      setError('Failed to add item');
-    }
-  };
-
+  if (loading) return <div>Loading...</div>;
   if (error) return <div className="error-message">{error}</div>;
-  if (isLoading) return <div className="loading">Loading...</div>;
 
   return (
     <div className="printers-peripherals-page">
       <h2>Printers & Peripherals Inventory</h2>
-      <AddInventoryForm onSubmit={handleAddItem} type="PRINTERS" />
-      <InventoryList 
-        items={items} 
-        onSort={handleSort}
-        sortConfig={sortConfig}
-        type="PRINTERS"
-      />
+      <div className="inventory-list">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Serial No.</th>
+              <th>Property No.</th>
+              <th>Brand/Model</th>
+              <th>Unit Cost</th>
+              <th>Date</th>
+              <th>Acct. Person</th>
+              <th>Status</th>
+              <th>Location</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, idx) => (
+              <tr key={idx}>
+                <td>{item.type || '-'}</td>
+                <td>{item.serial_no || '-'}</td>
+                <td>{item.property_no || '-'}</td>
+                <td>{item.brand_model || '-'}</td>
+                <td>{item.unit_cost || '-'}</td>
+                <td>{item.date || '-'}</td>
+                <td>{item.acct_person || '-'}</td>
+                <td>
+                  <span className={`status-cell ${item.status && item.status.toLowerCase() === 'serviceable' ? 'serviceable' : 'unserviceable'}`}>
+                    {item.status || '-'}
+                  </span>
+                </td>
+                <td>{item.location || '-'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-};
+}
 
 export default PrintersPeripheralsPage; 
