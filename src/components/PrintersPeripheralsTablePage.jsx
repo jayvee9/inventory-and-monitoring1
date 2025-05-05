@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../config/supabaseClient';
 import './PrintersPeripheralsPage.css';
-
-const supabaseUrl = 'https://xhmomrolqwicnzayewky.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobW9tcm9scXdpY256YXlld2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMwNTQ2NDksImV4cCI6MjA1ODYzMDY0OX0.52keJ2RWDgjKLxHwbq272NsWqNPohHhTxOpi4zqkJbY';
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 function PrintersPeripheralsTablePage() {
   const [items, setItems] = useState([]);
@@ -14,15 +10,20 @@ function PrintersPeripheralsTablePage() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from('printers_peripherals').select('*');
-      if (error) {
+      try {
+        const { data, error } = await supabase.from('printers_peripherals').select('*');
+        if (error) {
+          console.error('Error fetching data:', error);
+          throw error;
+        }
+        setItems(data || []);
+        setError(null);
+      } catch (err) {
         setError('Failed to fetch data');
         setItems([]);
-      } else {
-        setItems(data);
-        setError(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchData();
   }, []);

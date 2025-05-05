@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../config/supabaseClient';
 import RequestSupplyForm from './RequestSupplyForm';
 import OfficeSuppliesSubCategory from './OfficeSuppliesSubCategory';
 import './OfficeSuppliesPage.css';
-
-// Initialize Supabase client
-const supabaseUrl = 'https://xhmomrolqwicnzayewky.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhobW9tcm9scXdpY256YXlld2t5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMwNTQ2NDksImV4cCI6MjA1ODYzMDY0OX0.52keJ2RWDgjKLxHwbq272NsWqNPohHhTxOpi4zqkJbY';
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 function OfficeSuppliesPage() {
   const [supplies, setSupplies] = useState([]);
@@ -24,7 +19,10 @@ function OfficeSuppliesPage() {
         .select('*')
         .order('item_specifications', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching supplies:', error);
+        throw error;
+      }
       
       setSupplies(data || []);
       setError(null);
@@ -65,7 +63,7 @@ function OfficeSuppliesPage() {
         outside_ps_price: requestData.outsidePSPrice
       };
       
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('officesuppliesinventory')
         .insert([formattedData])
         .select();
