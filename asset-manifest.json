@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/inventory-and-monitoring1/static/css/main.53910a8c.css",
-    "main.js": "/inventory-and-monitoring1/static/js/main.ec5df755.js",
-    "static/js/14.394a4850.chunk.js": "/inventory-and-monitoring1/static/js/14.394a4850.chunk.js",
+    "main.css": "/inventory-and-monitoring1/static/css/main.f670439c.css",
+    "main.js": "/inventory-and-monitoring1/static/js/main.d2881fd4.js",
+    "static/js/14.4732bee4.chunk.js": "/inventory-and-monitoring1/static/js/14.4732bee4.chunk.js",
     "static/js/568.a96659c0.chunk.js": "/inventory-and-monitoring1/static/js/568.a96659c0.chunk.js",
     "index.html": "/inventory-and-monitoring1/index.html",
-    "main.53910a8c.css.map": "/inventory-and-monitoring1/static/css/main.53910a8c.css.map",
-    "main.ec5df755.js.map": "/inventory-and-monitoring1/static/js/main.ec5df755.js.map",
-    "14.394a4850.chunk.js.map": "/inventory-and-monitoring1/static/js/14.394a4850.chunk.js.map",
+    "main.f670439c.css.map": "/inventory-and-monitoring1/static/css/main.f670439c.css.map",
+    "main.d2881fd4.js.map": "/inventory-and-monitoring1/static/js/main.d2881fd4.js.map",
+    "14.4732bee4.chunk.js.map": "/inventory-and-monitoring1/static/js/14.4732bee4.chunk.js.map",
     "568.a96659c0.chunk.js.map": "/inventory-and-monitoring1/static/js/568.a96659c0.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.53910a8c.css",
-    "static/js/main.ec5df755.js"
+    "static/css/main.f670439c.css",
+    "static/js/main.d2881fd4.js"
   ]
 }
