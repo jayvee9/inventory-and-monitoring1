@@ -19,7 +19,6 @@ function PrintersPeripheralsPage() {
     brandModel: '',
     unitCost: '',
     date: '',
-    acctPerson: '',
     status: '',
     location: '',
   });
@@ -67,7 +66,6 @@ function PrintersPeripheralsPage() {
           brand_model: formData.brandModel,
           unit_cost: formData.unitCost,
           date: formData.date,
-          acct_person: formData.acctPerson,
           status: formData.status || 'SERVICEABLE',
           location: formData.location,
         }]);
@@ -81,7 +79,6 @@ function PrintersPeripheralsPage() {
         brandModel: '',
         unitCost: '',
         date: '',
-        acctPerson: '',
         status: '',
         location: '',
       });
@@ -223,16 +220,6 @@ function PrintersPeripheralsPage() {
                 </div>
               </div>
               <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="acctPerson">Accountable Person</label>
-                  <input
-                    type="text"
-                    id="acctPerson"
-                    name="acctPerson"
-                    value={formData.acctPerson}
-                    onChange={handleChange}
-                  />
-                </div>
                 <div className="form-group">
                   <label htmlFor="status">Status</label>
                   <select
