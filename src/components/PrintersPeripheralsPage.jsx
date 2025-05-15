@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../config/supabaseClient';
 import {
   Button,
-  TextField,
-  Grid,
 } from '@mui/material';
 import './PrintersPeripheralsPage.css';
 
@@ -237,13 +235,25 @@ function PrintersPeripheralsPage() {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="location">Location</label>
-                  <input
-                    type="text"
+                  <select
                     id="location"
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
-                  />
+                    required
+                  >
+                    <option value="">Select a location</option>
+                    <option value="ORD- Office of the Director">ORD- Office of the Director</option>
+                    <option value="FAD - Finance and Administrative Division">FAD - Finance and Administrative Division</option>
+                    <option value="LRD - Licensure and Registration Division">LRD - Licensure and Registration Division</option>
+                    <option value="Application Section">Application Section</option>
+                    <option value="Registration Section">Registration Section</option>
+                    <option value="Regulation Division">Regulation Division</option>
+                    <option value="Legal Section">Legal Section</option>
+                    <option value="Storage Room 2">Storage Room 2</option>
+                    <option value="Robinsons Iligan">Robinsons Iligan</option>
+                    <option value="Robinsons Valencia">Robinsons Valencia</option>
+                  </select>
                 </div>
               </div>
               <div className="form-buttons">

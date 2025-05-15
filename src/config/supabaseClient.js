@@ -6,7 +6,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const options = {
   auth: {
     autoRefreshToken: true,
-    persistSession: true,
+    persistSession: false,
     detectSessionInUrl: true
   },
   global: {

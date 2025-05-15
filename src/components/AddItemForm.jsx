@@ -1,5 +1,18 @@
 import { sheetService, STATUS_OPTIONS } from '../services/sheetService';
 
+const LOCATION_OPTIONS = [
+  "ORD- Office of the Director",
+  "FAD - Finance and Administrative Division",
+  "LRD - Licensure and Registration Division",
+  "Application Section",
+  "Registration Section",
+  "Regulation Division",
+  "Legal Section",
+  "Storage Room 2",
+  "Robinsons Iligan",
+  "Robinsons Valencia"
+];
+
 // ... in your form component ...
 <div>
   <label htmlFor="status">Status</label>

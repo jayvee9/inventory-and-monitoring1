@@ -18,6 +18,8 @@ import {
   DialogContent,
   DialogActions,
   Grid,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import EditProfileModal from '../components/EditProfileModal';
 
@@ -138,13 +140,26 @@ const OfficeSupplies = () => {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Location"
+              <label htmlFor="location">Location</label>
+              <select
+                id="location"
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-              />
+                required
+              >
+                <option value="">Select a location</option>
+                <option value="ORD- Office of the Director">ORD- Office of the Director</option>
+                <option value="FAD - Finance and Administrative Division">FAD - Finance and Administrative Division</option>
+                <option value="LRD - Licensure and Registration Division">LRD - Licensure and Registration Division</option>
+                <option value="Application Section">Application Section</option>
+                <option value="Registration Section">Registration Section</option>
+                <option value="Regulation Division">Regulation Division</option>
+                <option value="Legal Section">Legal Section</option>
+                <option value="Storage Room 2">Storage Room 2</option>
+                <option value="Robinsons Iligan">Robinsons Iligan</option>
+                <option value="Robinsons Valencia">Robinsons Valencia</option>
+              </select>
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField

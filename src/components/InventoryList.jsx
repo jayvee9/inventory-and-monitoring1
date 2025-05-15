@@ -95,8 +95,10 @@ const InventoryList = ({ items, onSort, sortConfig, type }) => {
           location: 'Warehouse'
         }}
       />
+    
     </div>
   );
+  
 };
 
 export default InventoryList;
